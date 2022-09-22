@@ -75,8 +75,16 @@ WSGI_APPLICATION = 'mlstocks.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mlstocksdb_staywinmay',
+        'USER': 'mlstocksdb_staywinmay',
+        'PASSWORD': '85eea08a1853b63bff5009d06066629047ba3755',
+        'HOST': 'h1.host.filess.io',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        }
     }
 }
 
