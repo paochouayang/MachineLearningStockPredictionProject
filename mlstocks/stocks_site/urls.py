@@ -7,4 +7,5 @@ app_name = 'stocks_site'
 urlpatterns = [
     path('',views.login_view,name='login'),
     path('forgetPass', views.forgetPass,name="forgetPass"),
+    path('createAccount', views.createAccount, name="createAccount")
 ]
