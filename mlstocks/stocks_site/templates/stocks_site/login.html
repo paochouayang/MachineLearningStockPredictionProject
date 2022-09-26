@@ -5,9 +5,9 @@
                                 background-color: white; padding: 20px;
                                 border-radius:20px;">
         <form>
-            {% comment %} <img class="mb-4" src="/docs/5.2/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> {% endcomment %}
-            <h1>MLStocks</h1>
-            <h2 class="h3 mt-5 mb-3 fw-normal">Please sign in</h2>
+            {% load static %}
+            <img class="mb-4" style="horizontal-align: middle;" src="{% static 'img/MLStocks.png' %}" alt="" width="80%">
+            <h2 class="h3 mb-3 fw-normal">Please sign in</h2>
 
             <div class="form-floating">
             <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
