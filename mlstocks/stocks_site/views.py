@@ -1,8 +1,9 @@
 from django.shortcuts import render
+from django.views import View
 
 # Create your views here.
 def login_view(request):
     return render(request,'stocks_site/login.html')
 
-def forget_pass(request):
-    return render(request,'stocks_site/forgetPass.html')
+def forgetPass(request):
+        return render(request,'stocks_site/forgetPass.html')
