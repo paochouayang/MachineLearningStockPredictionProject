@@ -1,12 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <main class="m-auto" style="max-width: 330px; align-items: center;
-                                background-color: white; padding: 20px;
-                                border-radius:20px;">
+    <main class="m-auto login-main">
         <form class="mb-0">
             {% load static %}
-            <img class="mb-4" style="horizontal-align: middle;" src="{% static 'img/MLStocks.png' %}" alt="" width="80%">
+            <img class="mb-4 login-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo" >
             <h2 class="h3 mb-3 fw-normal">Please sign in</h2>
 
             <div class="form-floating">

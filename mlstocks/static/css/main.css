@@ -1,0 +1,22 @@
+.login-body {
+    background-image:url(
+            "https://img.rawpixel.com/private/static/images/website/2022-05/px1163685-image-kwvy4a48.jpg?w=1200&h=1200&dpr=1&fit=clip&crop=default&fm=jpg&q=75&vib=3&con=3&usm=15&cs=srgb&bg=F4F4F3&ixlib=js-2.2.1&s=2fa2dd7089066fd3d37b2390f09e7896");
+
+}
+
+body .spacer {
+    min-height: 40px;
+    background-color: rgb(0,0,0,0);
+}
+
+body .login-main {
+    max-width: 330px;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius:20px;
+}
+
+form .login-logo {
+    width: 80%;
+}
