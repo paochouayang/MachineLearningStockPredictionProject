@@ -7,3 +7,6 @@ def login_view(request):
 
 def forgetPass(request):
         return render(request,'stocks_site/forgetPass.html')
+
+def createAccount(request):
+    return render(request,'stocks_site/createAccount.html')
