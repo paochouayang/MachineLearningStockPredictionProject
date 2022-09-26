@@ -5,4 +5,5 @@ app_name = 'stocks_site'
 
 urlpatterns = [
     path('',views.login_view,name='login'),
+    path('',views.forget_pass,name='forgetPass'),
 ]
