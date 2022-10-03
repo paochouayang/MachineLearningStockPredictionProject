@@ -12,3 +12,7 @@ class ForgotPass(View):
 class CreateAccount(View):
     def get(self,request):
         return render(request,'stocks_site/createAccount.html')
+
+class Main(View):
+    def get(self,request):
+        return render(request,'stocks_site/main.html')
