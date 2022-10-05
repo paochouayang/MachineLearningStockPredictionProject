@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<div class="spacer"></div>
+    <main class="m-auto login-main">
+        <form>
+            {% load static %}
+            <img class="mb-4 login-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo">
+
+
+
+             <a class="w-100 btn btn-lg btn-primary" onclick="window.location.href='/';">Back</a>
+            <p class="mt-2 mb-0 text-muted">MLStocks &copy; 2022</p>
+        </form>
+    </main>
+{% endblock %}
