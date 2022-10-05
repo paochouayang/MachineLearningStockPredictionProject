@@ -20,3 +20,7 @@ body .login-main {
 form .login-logo {
     width: 80%;
 }
+
+.link-clickable {
+    cursor: pointer;
+}
