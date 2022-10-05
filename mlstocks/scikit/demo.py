@@ -1,7 +1,7 @@
 from stockPredict import Stocks
 
 
-symbol = 'BBBY'
+symbol = ''
 algorithm = 'randomforest'
 
 # So far, this predicts better in 5-day forecasts.
