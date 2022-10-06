@@ -35,7 +35,7 @@ def stockPredict(request):
             return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
     else:
         stockForm = StocksForm()
-    return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
+    return render(request, 'stocks_site/main.html', {'stockForm': stockForm})
     
 
 def user_login(request):
