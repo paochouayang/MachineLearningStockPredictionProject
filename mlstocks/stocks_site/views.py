@@ -23,6 +23,7 @@ class Main(View):
         return render(request,'stocks_site/main.html')
 
 def user_login(request):
+    message = ""
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -35,12 +36,12 @@ def user_login(request):
                 login(request, user)
                 return render(request,'stocks_site/main.html')
             else:
-                return HttpResponse('Disabled account')
+                message = "Invalid Username/Password"
         else:
-            return HttpResponse('Invalid login')
+            message = "Invalid Username/Password"
     else:
         form = LoginForm()
-    return render(request, 'stocks_site/login.html', {'form': form})
+    return render(request, 'stocks_site/login.html', {'form': form, 'message': message})
 
 def register(request):
     if request.method == 'POST':

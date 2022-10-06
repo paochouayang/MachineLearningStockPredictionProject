@@ -10,7 +10,9 @@
         
             {{ form.as_p }}
             {% csrf_token %}
-            
+            {% if message %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endif %}
             <button class="w-100 mb-1 btn btn-lg btn-primary">Sign in</button>
             <a class="w-100 btn btn-lg btn-primary" onclick="window.location.href='createAccount';">Create Account</a>
             <p class="mt-2 mb-0 text-muted">MLStocks &copy; 2022</p>
