@@ -1,24 +1,15 @@
 {% extends 'base.html' %}
 
+{% block title %}Create an account{% endblock %}
+
 {% block content %}
 <div class="spacer"></div>
     <main class="m-auto login-main">
         <form method="post">
             <h1 class="h3 mb-3 fw-normal">Please Create an Account</h1>
 
-            <div class="form-floating">
-            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-            <label for="floatingInput">Email address</label>
-            </div>
-            <div class="form-floating">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-            <label for="floatingPassword">Password</label>
-            </div>
-
-            <div class="form-floating">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-            <label for="floatingPassword">Confirm Password</label>
-            </div>
+            {{ user_form.as_p }}
+            {% csrf_token %}
 
             <button class="w-100 mt-1 mb-1 btn btn-lg btn-primary" type="submit">Create</button>
             <a class="w-100 btn btn-lg btn-primary" onclick="window.location.href='/';">Back</a>

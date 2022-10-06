@@ -6,8 +6,8 @@ from stocks_site.views import Login, ForgotPass, CreateAccount, Main
 app_name = 'stocks_site'
 
 urlpatterns = [
-    path('',Login.as_view(),name='login'),
+    path('',views.user_login,name='login'),
     path('forgetPass', ForgotPass.as_view(),name="forgetPass"),
-    path('createAccount', CreateAccount.as_view(), name="createAccount"),
+    path('createAccount', views.register, name="createAccount"),
     path('main', Main.as_view(), name="main"),
 ]
