@@ -69,7 +69,8 @@ class Stocks:
         self.training_segment = 4 * self.steps
 
 
-    def forcast_test(self):
+    def forcast_test(self):  
+        plt.cla()      
         model = self.__train()
         prediction = self.__predict(model)
         return prediction
