@@ -2,7 +2,9 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, UserRegistrationForm
+from .forms import LoginForm, UserRegistrationForm, StocksForm
+from .stockPredict import Stocks
+
 
 # Create your views here.
 class Login(View):
@@ -22,6 +24,20 @@ class Main(View):
     def get(self,request):
         return render(request,'stocks_site/main.html')
 
+def stockPredict(request):
+    if request.method == 'POST':
+        stockForm = StocksForm(request.POST)
+        if stockForm.is_valid(): 
+            input = stockForm.cleaned_data
+            stock_obj = Stocks(symbol=input['ticker'], algorithm='randomforest', forcast_time_span='5d')
+            stock_obj.forcast_test()
+            graphic = stock_obj.plot
+            return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
+    else:
+        stockForm = StocksForm()
+    return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
+    
+
 def user_login(request):
     message = ""
     if request.method == 'POST':
@@ -34,7 +50,7 @@ def user_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return render(request,'stocks_site/main.html')
+                return redirect('/main')
             else:
                 message = "Invalid Username/Password"
         else:

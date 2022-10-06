@@ -1,16 +1,21 @@
 {% extends 'base.html' %}
-
+{% block title %}Main Page{% endblock %}
 {% block content %}
 <div class="spacer"></div>
-    <main class="m-auto login-main">
-        <form>
+    <main class="w-100 home-main">
+        <form class="m-auto home-form" method="post">
             {% load static %}
-            <img class="mb-4 login-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo">
+            <img class="mb-4 home-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo">
 
             <h2>Welcome to the main page</h2>
 
+            {{ stockForm.as_p }}
+            {% csrf_token %}
+
+            <button class="w-100 mt-1 mb-1 btn btn-lg btn-primary" type="submit">Submit</button>
             <a class="w-100 btn btn-lg btn-primary" onclick="window.location.href='/';">Back</a>
             <p class="mt-2 mb-0 text-muted">MLStocks &copy; 2022</p>
         </form>
+        <img class="login-logo" src="data:image/png;base64,{{ graphic|safe }}">
     </main>
 {% endblock %}
