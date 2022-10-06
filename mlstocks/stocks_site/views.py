@@ -33,8 +33,7 @@ def user_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return HttpResponse('Authenticated '\
-                                    'successfully')
+                return render(request,'stocks_site/main.html')
             else:
                 return HttpResponse('Disabled account')
         else:
@@ -54,8 +53,7 @@ def register(request):
             # Save the User object
             new_user.save()
             return render(request,
-                            'stocks_site/createAccountDone.html',
-                            {'new_user': new_user})
+                            'stocks_site/createAccountDone.html')
     else:
         user_form = UserRegistrationForm()
     return render(request,
