@@ -63,3 +63,6 @@ class UserRegistrationForm(ModelForm):
         if cd['password'] != cd['password2']:
             raise forms.ValidationError('Passwords don\'t match.')
         return cd['password2']
+
+class StocksForm(Form):
+    ticker = forms.CharField()

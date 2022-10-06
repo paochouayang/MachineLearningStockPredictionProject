@@ -1,11 +1,17 @@
 .login-body {
     background-image:url("/static/img/backgroundMain.jpg");
-
 }
 
 body .spacer {
     min-height: 40px;
     background-color: rgb(0,0,0,0);
+}
+
+body .home-main {
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
 }
 
 body .login-main {
@@ -16,8 +22,16 @@ body .login-main {
     border-radius:20px;
 }
 
+.home-form {
+    max-width: 330px;
+}
+
 form .login-logo {
     width: 80%;
+}
+
+form .home-logo {
+    max-width: 232px;
 }
 
 .link-clickable {
