@@ -14,6 +14,9 @@ class ForgotPass(View):
 class CreateAccount(View):
     def get(self,request):
         return render(request,'stocks_site/createAccount.html')
+class CreateAccountDone(View):
+    def get(self,request):
+        return render(request,'stocks_site/createAccountDone.html')
 
 class Main(View):
     def get(self,request):
@@ -51,7 +54,7 @@ def register(request):
             # Save the User object
             new_user.save()
             return render(request,
-                            'account/createAccountDone.html',
+                            'stocks_site/createAccountDone.html',
                             {'new_user': new_user})
     else:
         user_form = UserRegistrationForm()
