@@ -25,6 +25,7 @@ pip install -r requirements.txt
 
 - TODO    
     - implement logic
+    - email integration
 
 ## create account 
 <details>
@@ -47,6 +48,7 @@ pip install -r requirements.txt
 - TODO    
     - Implement behind seperate API
     - Fine tune for better results
+    - Add ticker validation
 
 ## Main page with working input
 <details>
@@ -62,6 +64,15 @@ pip install -r requirements.txt
         - Could become dropdown to select between various settings and/or ML algos
     - save tickers and results
     
+## Account management
+<details>
+<summary>Done</summary>
+
+
+</details>
+
+- TODO
+    - Add account maintenance screen
     
 ## Overall
 <details>
