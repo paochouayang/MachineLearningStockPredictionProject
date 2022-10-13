@@ -81,15 +81,9 @@ class Stocks:
         delta = datetime.timedelta(days=self.delta_days)
         start_date = date.today() - delta
         end_date = date.today()
-        if self.forcast_time_span in ['1d', '5d']:
-            data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
-                               interval=self.granularity)
-        if self.forcast_time_span in ['1mo', '6mo']:
-            data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
-                               interval=self.granularity)
-        if self.forcast_time_span in ['1y']:
-            data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
-                               interval=self.granularity)
+        data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
+                           interval=self.granularity)
+
         self.data = data
         price_data = self.data.iloc[:]['Open'].values
 
@@ -118,12 +112,13 @@ class Stocks:
         model.fit(self.x_train, self.y_train)
         prediction = self.__predict(model)
         mse = mean_squared_error(self.y_test, prediction[0])
-        print(mse)
+        print(f"Mean Squared Error: {mse}")
 
 
         self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data')
         self.data['Open'][-self.steps:].plot(label='Testing data')
         plt.plot(self.data.index[-self.steps:], prediction[0], label='Prediction data')
+        plt.title('Prediction for stock: ' + self.symbol)
         plt.legend(loc='upper center')
         plt.show()
 
