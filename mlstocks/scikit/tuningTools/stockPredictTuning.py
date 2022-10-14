@@ -2,20 +2,24 @@ import datetime
 from datetime import date
 import yfinance as yf
 import numpy as np
-import numpy
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
+
+
+# import matplotlib.pyplot as plt
 
 
 class Stocks:
-    def __init__(self, symbol, algorithm, forcast_time_span):
+    def __init__(self, symbol, algorithm, forecast_time_span, max_depth, n_estimators, max_features, seg_ratio):
         self.symbol = symbol
         self.algorithm = algorithm
         self.data_points = 1000
-        self.forcast_time_span = forcast_time_span
+        self.forecast_time_span = forecast_time_span
         self.delta_days = 720
-        self.seg_ratio = None
+        self.max_depth = max_depth
+        self.n_estimators = n_estimators
+        self.max_features = max_features
+        self.seg_ratio = seg_ratio
         self.training_segment = None
         self.start = None
         self.end = None
@@ -32,56 +36,44 @@ class Stocks:
         else:
             raise ValueError(f'Machine learning algorithm: {algorithm} is not available.')
 
-        if forcast_time_span in ['1d', '5d', '1mo', '6mo', '1y']:
-            self.forcast_time_span = forcast_time_span
+        if forecast_time_span in ['1d', '5d', '1mo', '6mo', '1y']:
+            self.forecast_time_span = forecast_time_span
         else:
-            raise ValueError(f'Forcast time span of {forcast_time_span} is not available')
+            raise ValueError(f'Forecast time span of {forecast_time_span} is not available')
 
-        # Steps are used for number of iterations to self feed back into the prediction/forcast model.
-        # The granularity for these forcast time spans are something we will need to experiment with to achieve
+        # Steps are used for number of iterations to self feed back into the prediction/forecast model.
+        # The granularity for these forecast time spans are something we will need to experiment with to achieve
         # the best prediction accuracy.
-        if forcast_time_span == '1d':
+        if forecast_time_span == '1d':
             # About 7 hours in a trading day
             self.steps = 7
             self.granularity = '1h'
-            self.seg_ratio = 2
-        if forcast_time_span == '5d':
+        if forecast_time_span == '5d':
             # About 45 hours in a 5-day trading period
             self.steps = 45
             self.granularity = '1h'
-            self.seg_ratio = 2
-        if forcast_time_span == '1mo':
+        if forecast_time_span == '1mo':
             # 30 days in a month
             self.steps = 30
             self.granularity = '1d'
-            self.seg_ratio = 1
-        """
-        if forcast_time_span == '6mo':
+        if forecast_time_span == '6mo':
             # 6 months has 26 weeks x 5 trading days
             self.steps = 130
             self.granularity = '1d'
             self.delta_days = 4000
-        if forcast_time_span == '1y':
+        if forecast_time_span == '1y':
             # 1 year has 52 weeks x 5 trading days
             self.steps = 260
             self.granularity = '1d'
             self.delta_days = 4000
-        """
+
         self.training_segment = self.seg_ratio * self.steps
 
-
-    def forcast_test(self):
+    def get_mse(self):
         model = self.__train()
         prediction = self.__predict(model)
         mse = mean_squared_error(self.y_test, prediction[0])
-        print(f"Mean Squared Error: {mse}")
-        plt.plot(self.data.index[-self.steps:], prediction[0], label='Prediction data', color='red')
-        self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data', color='blue')
-        self.data['Open'][-self.steps:].plot(label='Testing data', color='green')
-        plt.title('Prediction for stock: ' + self.symbol)
-        plt.legend(loc='lower left')
-        plt.show()
-        return prediction
+        return mse
 
     def __train(self):
         model = None
@@ -97,7 +89,6 @@ class Stocks:
         end_date = date.today()
         data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
                            interval=self.granularity)
-
         self.data = data
         price_data = self.data.iloc[:]['Open'].values
 
@@ -114,7 +105,7 @@ class Stocks:
                 index_lst.append(i)
         price_data = np.delete(price_data, index_lst)
 
-        # Method to create training
+        # Method to create training data
         def create_dataset(dataframe):
             x = []
             y = []
@@ -129,13 +120,8 @@ class Stocks:
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
         # self.x_train, self.y_train = make_regression(n_features=4, n_informative=2, random_state=0, shuffle=False)
-        model = None
-        if self.forcast_time_span == '1d':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features='sqrt')
-        if self.forcast_time_span == '5d':
-            model = RandomForestRegressor(max_depth=50, random_state=123, n_estimators=50, max_features='log2')
-        if self.forcast_time_span == '1mo':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features='log2')
+        model = RandomForestRegressor(max_depth=self.max_depth, random_state=123, n_estimators=self.n_estimators,
+                                      max_features=self.max_features)
         model.fit(self.x_train, self.y_train)
 
         return model
