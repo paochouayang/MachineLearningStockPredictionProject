@@ -29,6 +29,7 @@ class UserRegistrationForm(ModelForm):
                                     'id': 'floatingPassword',
                                     'placeholder': 'Repeat Password'
                                 }))
+
     class Meta:
         model = User
         fields = ('username', 'first_name', 'email')
