@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, UserRegistrationForm, StocksForm, ForgotPassForm
 from .stockPredict import Stocks
 
@@ -30,6 +32,7 @@ class ForgotPass(View):
                 forgotform = ForgotPassForm()
             return render(request, 'stocks_site/forgetPass.html', {'forgotform': forgotform})
 
+@login_required
 def stockPredict(request):
     if request.method == 'POST':
         stockForm = StocksForm(request.POST)
@@ -82,3 +85,7 @@ def register(request):
     return render(request,
                     'stocks_site/createAccount.html',
                     {'user_form': user_form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
