@@ -16,6 +16,26 @@ class LoginForm(Form):
                                     'placeholder': 'Password'
                                 }))
 
+class ForgotPassForm(Form):
+    username = forms.CharField(label='',
+                                widget=forms.TextInput(attrs={
+                                    'class': "form-control",
+                                    'id': 'floatingInput',
+                                    'placeholder': 'UserName'
+                                }))
+    password = forms.CharField(label='',
+                                widget=forms.PasswordInput(attrs={
+                                    'class': "form-control",
+                                    'id': 'floatingPassword',
+                                    'placeholder': 'Password'
+                                }))
+    password2 = forms.CharField(label='',
+                               widget=forms.PasswordInput(attrs={
+                                   'class': "form-control",
+                                   'id': 'floatingPassword',
+                                   'placeholder': 'Confirm Password'
+                               }))
+
 class UserRegistrationForm(ModelForm):
     password = forms.CharField(label='',
                                 widget=forms.PasswordInput(attrs={

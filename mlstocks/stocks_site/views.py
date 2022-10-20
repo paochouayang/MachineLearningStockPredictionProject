@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, UserRegistrationForm, StocksForm
+from .forms import LoginForm, UserRegistrationForm, StocksForm, ForgotPassForm
 from .stockPredict import Stocks
 
 
@@ -10,9 +10,7 @@ from .stockPredict import Stocks
 class Login(View):
     def get(self,request):
         return render(request,'stocks_site/login.html')
-class ForgotPass(View):
-    def get(self, request):
-        return render(request,'stocks_site/forgetPass.html')
+
 class CreateAccount(View):
     def get(self,request):
         return render(request,'stocks_site/createAccount.html')
@@ -23,6 +21,14 @@ class CreateAccountDone(View):
 class Main(View):
     def get(self,request):
         return render(request,'stocks_site/main.html')
+
+class ForgotPass(View):
+        def get(self, request):
+            if request.method == 'POST':
+                forgotform = ForgotPassForm(request.POST)
+            else:
+                forgotform = ForgotPassForm()
+            return render(request, 'stocks_site/forgetPass.html', {'forgotform': forgotform})
 
 def stockPredict(request):
     if request.method == 'POST':
