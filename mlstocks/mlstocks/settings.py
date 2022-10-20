@@ -33,12 +33,14 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'stocks_site.apps.StocksSiteConfig',
+    'mlapi.apps.MlapiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +138,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'stocks_site:main'
 LOGIN_URL = 'stocks_site:login'
 LOGOUT_URL = 'stocks_site:login'
+
+REST_FRAMEWORK = {
+'DEFAULT_PERMISSION_CLASSES': [
+'rest_framework.permissions.AllowAny'
+]
+}

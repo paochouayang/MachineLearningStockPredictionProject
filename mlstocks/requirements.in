@@ -3,3 +3,4 @@ mysqlclient>=2.0
 yfinance>=0.1.7
 sklearn>=0.0
 matplotlib>=3.6
+djangorestframework>=3.14.0

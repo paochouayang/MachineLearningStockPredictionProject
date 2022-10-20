@@ -5,7 +5,7 @@ from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, UserRegistrationForm, StocksForm, ForgotPassForm
-from .stockPredict import Stocks
+import requests, json
 
 
 # Create your views here.
@@ -38,9 +38,12 @@ def stockPredict(request):
         stockForm = StocksForm(request.POST)
         if stockForm.is_valid(): 
             input = stockForm.cleaned_data
-            stock_obj = Stocks(symbol=input['ticker'], algorithm='randomforest', forcast_time_span='5d')
-            stock_obj.forcast_test()
-            graphic = stock_obj.plot
+            symbol = {'ticker':input['ticker']}
+            response = requests.get(f'http://127.0.0.1:8000/api/', params=symbol)
+            response_dict = json.loads(response.text)
+
+            graphic = response_dict['Prediction']
+            
             return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
     else:
         stockForm = StocksForm()
