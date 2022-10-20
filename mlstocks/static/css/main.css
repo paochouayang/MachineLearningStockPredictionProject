@@ -1,5 +1,8 @@
 .login-body {
+    display: block;
     background-image:url("/static/img/backgroundMain.jpg");
+    height: 100%;
+    align-items: center;
 }
 
 body .spacer {
@@ -12,6 +15,10 @@ body .home-main {
     background-color: white;
     padding: 20px;
     border-radius: 20px;
+    height: 95%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 body .login-main {
