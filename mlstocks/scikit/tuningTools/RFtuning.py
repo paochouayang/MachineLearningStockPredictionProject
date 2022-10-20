@@ -12,7 +12,7 @@ max_features_param = [None, 'sqrt', 'log2']
 seg_ratio = [1, 2, 3]
 
 # Selected stocks from different price ranges.
-stocks_lst = ['PSTV', 'TWTR', 'SOFI', 'ROIV', 'TSLA', 'AM', 'RITM', 'SWN', 'PBLA', 'APGN', 'LVLU']
+stocks_lst = ['PSTV', 'TWTR', 'SOFI', 'ROIV', 'TSLA', 'COMS', 'RITM', 'SWN', 'PBLA', 'APGN', 'LVLU']
 
 mse_list = []
 size = len(forecast_time_span_lst) * len(max_depth_param) * len(n_estimators_param) * len(max_features_param) * len(stocks_lst) * len(seg_ratio)
