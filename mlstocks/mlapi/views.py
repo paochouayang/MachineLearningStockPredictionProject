@@ -7,8 +7,9 @@ from .stockPredict import Stocks
 
 class StockPredictions(APIView):
     def get(self, request):
-        stock_obj = Stocks(request.GET.get('ticker'), algorithm='randomforest', forcast_time_span='5d')
-        stock_obj.forcast_test()
+        stock_obj = Stocks(request.GET.get('ticker'), algorithm='randomforest', forecast_time_span='5d')
+        #stock_obj.forecast_test()
+        stock_obj.forecast()
         graphic = stock_obj.plot
         mlResponse = {"Prediction" : graphic}
         return Response(mlResponse, status=status.HTTP_200_OK)

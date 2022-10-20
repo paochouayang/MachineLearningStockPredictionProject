@@ -33,7 +33,7 @@ class Stocks:
         else:
             raise ValueError(f'Machine learning algorithm: {algorithm} is not available.')
 
-        if forecast_time_span in ['1d', '5d', '1mo', '6mo', '1y']:
+        if forecast_time_span in ['1d', '5d', '1mo']:
             self.forecast_time_span = forecast_time_span
         else:
             raise ValueError(f'Forecast time span of {forecast_time_span} is not available')
