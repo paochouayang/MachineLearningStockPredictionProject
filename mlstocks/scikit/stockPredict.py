@@ -75,7 +75,6 @@ class Stocks:
         price_data = self.data.iloc[:]['Open'].values
         x_predict = np.array(price_data[-self.training_segment:]).reshape(1, -1)
         prediction = self.__predict(model, x_predict)
-        print(type(self.data.index[:]))
 
         # Generate future dates to plot against prediction
         def extend_x_axis():
@@ -97,7 +96,6 @@ class Stocks:
                 future_points_lst.append(current_point)
             return future_points_lst
 
-        print(extend_x_axis())
         plt.plot(extend_x_axis(), prediction[0], label='Prediction', color='red')
         self.data['Open'][-(self.training_segment + self.steps):].plot(label='Historical Data', color='blue')
         plt.title('Prediction for stock: ' + self.symbol)
