@@ -82,7 +82,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mlstocksdb_staywinmay',
         'USER': 'mlstocksdb_staywinmay',
-        'PASSWORD': '85eea08a1853b63bff5009d06066629047ba3755',
+        'PASSWORD': 'eFYHnt/PRLwvHNSpo4oiVD2pbNt977HXdpHnaPDU3Oh1iFg46i8e+kjWYaaatS8Q',
         'HOST': 'h1.host.filess.io',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {
