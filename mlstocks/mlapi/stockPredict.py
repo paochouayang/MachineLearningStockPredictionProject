@@ -10,6 +10,13 @@ import base64
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 import pandas as pd
+import tensorflow.keras as keras
+from keras.layers import LSTM, Dense, Dropout
+from sklearn.preprocessing import MinMaxScaler
+import os
+from os.path import exists
+import pickle
+
 
 
 class Stocks:
@@ -72,7 +79,7 @@ class Stocks:
             self.delta_days = 4000
         """
 
-        self.training_segment = 4 * self.steps
+        self.training_segment = self.seg_ratio * self.steps
 
     def forecast(self):
         plt.cla()
@@ -101,7 +108,7 @@ class Stocks:
                 future_points_lst.append(current_point)
             return future_points_lst
 
-        plt.plot(extend_x_axis(), prediction[0], label='Prediction', color='red')
+        plt.plot(extend_x_axis(), prediction, label='Prediction', color='red')
         self.data['Open'][-(self.training_segment + self.steps):].plot(label='Historical Data', color='blue')
         plt.legend(loc='lower left')
 
@@ -122,7 +129,7 @@ class Stocks:
         prediction = self.__predict(model, self.x_test)
         self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data')
         self.data['Open'][-self.steps:].plot(label='Testing data')
-        plt.plot(self.data.index[-self.steps:], prediction[0], label='Prediction data')
+        plt.plot(self.data.index[-self.steps:], prediction, label='Prediction data')
         plt.legend(loc='upper center')
 
         buffer = BytesIO()
@@ -181,25 +188,89 @@ class Stocks:
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
         # self.x_train, self.y_train = make_regression(n_features=4, n_informative=2, random_state=0, shuffle=False)
-        model = None
-        if self.forecast_time_span == '1d':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features='log2')
-        if self.forecast_time_span == '5d':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features=None)
-        if self.forecast_time_span == '1mo':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=100, max_features='sqrt')
-        model.fit(self.x_train, self.y_train)
 
-        return model
+        filename = ''
+        if self.forecast_time_span == '1d':
+            filename = 'random_forest_' + self.symbol.upper() + '_1day_model.sav'
+        if self.forecast_time_span == '5d':
+            filename = 'random_forest_' + self.symbol.upper() + '_5day_model.sav'
+        if self.forecast_time_span == '1mo':
+            filename = 'random_forest_' + self.symbol.upper() + '_1month_model.sav'
+
+        cwd = os.getcwd()
+        if exists(cwd + '\\mlapi\\blobStorage\\' + filename):
+            loaded_model = pickle.load(open('mlapi/blobStorage/' + filename, 'rb'))
+        else:
+            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
+
+        return loaded_model
 
     def __lstm(self):
-        model = None
+        delta = datetime.timedelta(days=self.delta_days)
+        start_date = date.today() - delta
+        end_date = date.today()
+        data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
+                           interval=self.granularity)
+
+        self.data = data
+        price_data = self.data.iloc[:]['Open'].values
+
+        # Limit amount of data points. Too much data causes increased training time.
+        if len(price_data) >= self.data_points:
+            price_data = self.data.iloc[:]['Open'].values[-self.data_points:]
+        else:
+            price_data = self.data.iloc[:]['Open'].values[:]
+
+        # Remove any NaN values from price_data
+        index_lst = []
+        for i in range(len(price_data)):
+            if np.isnan(price_data[i]):
+                index_lst.append(i)
+        price_data = np.delete(price_data, index_lst)
+
+        # Method to create training
+        def create_dataset(dataframe):
+            dataframe = MinMaxScaler(feature_range=(0, 1)).fit_transform(dataframe.reshape(-1, 1))
+            x = []
+            y = []
+            for i in range(self.training_segment, len(dataframe)):
+                x.append(dataframe[i - self.training_segment:i])
+                y.append(dataframe[i])
+            x = np.array(x)
+            y = np.array(y)
+            return x, y
+
+        x_train, y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
+        self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
+        self.y_test = np.array(price_data[-self.steps:])
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        y_train = y_train.flatten()
+        model = keras.models.Sequential()
+        model.add(LSTM(units=10, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+        model.add(LSTM(units=25))
+        model.add(Dense(units=1))
+
+        model.compile(loss="mse", optimizer='adam')
+        # model.summary()
+        model.fit(x_train, y_train, epochs=100, batch_size=1000, verbose=1, shuffle=False)
         return model
 
     def __predict(self, model, data):
         prediction = data
+        x_predict = data
 
         for i in range(self.steps):
-            prediction = np.append(prediction, model.predict(prediction))
-            prediction = prediction[-self.training_segment:].reshape(1, -1)
-        return prediction[:, -self.steps:]
+            if self.algorithm == 'lstm':
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                x_predict = scaler.fit_transform(x_predict.reshape(-1, 1))
+                x_predict = np.reshape(x_predict, (1, x_predict.shape[0], 1))
+                next_predict = model.predict(x_predict)
+                next_predict = scaler.inverse_transform(next_predict.reshape(-1, 1))
+                prediction = np.append(prediction, next_predict)
+                x_predict = prediction[-self.training_segment:].reshape(1, -1)
+            else:
+                next_predict = model.predict(x_predict)
+                prediction = np.append(prediction, next_predict)
+                x_predict = prediction[-self.training_segment:].reshape(1, -1)
+
+        return prediction[-self.steps:]

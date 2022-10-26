@@ -1,5 +1,5 @@
-def write_best_settings():
-    with open('RF_TuningResults.txt', 'r') as file:
+def write_best_settings(path):
+    with open(path, 'r') as file:
         settings_lst = file.read().splitlines()
     forecast_time_span_lst = ['1d', '5d', '1mo']
     for forecast_time_span in forecast_time_span_lst:
@@ -14,6 +14,5 @@ def write_best_settings():
         with open('bestSettings.txt', 'a') as file:
             file.write(str(best_settings) + '\n')
 
-write_best_settings()
 
 
