@@ -17,12 +17,6 @@ class LoginForm(Form):
                                 }))
 
 class ForgotPassForm(Form):
-    username = forms.CharField(label='',
-                                widget=forms.TextInput(attrs={
-                                    'class': "form-control",
-                                    'id': 'floatingInput',
-                                    'placeholder': 'UserName'
-                                }))
     password = forms.CharField(label='',
                                 widget=forms.PasswordInput(attrs={
                                     'class': "form-control",
@@ -30,11 +24,24 @@ class ForgotPassForm(Form):
                                     'placeholder': 'Password'
                                 }))
     password2 = forms.CharField(label='',
-                               widget=forms.PasswordInput(attrs={
-                                   'class': "form-control",
-                                   'id': 'floatingPassword',
-                                   'placeholder': 'Confirm Password'
-                               }))
+                                widget=forms.PasswordInput(attrs={
+                                    'class': "form-control",
+                                    'id': 'floatingPassword',
+                                    'placeholder': 'Confirm Password'
+                                }))
+    def clean_password2(self):
+        cd = self.cleaned_data
+        if cd['password'] != cd['password2']:
+            raise forms.ValidationError('Passwords don\'t match.')
+        return cd['password2']
+
+class ForgotPassEmailForm(Form):
+    email = forms.CharField(label='',
+                            widget=forms.EmailInput(attrs={
+                            'class': "form-control",
+                            'id': 'floatingInput',
+                            'placeholder': 'name@example.com'
+                            }))
 
 class UserRegistrationForm(ModelForm):
     password = forms.CharField(label='',
