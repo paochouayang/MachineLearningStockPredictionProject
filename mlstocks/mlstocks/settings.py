@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mlstocksdb_staywinmay',
         'USER': 'mlstocksdb_staywinmay',
-        'PASSWORD': 'eFYHnt/PRLwvHNSpo4oiVD2pbNt977HXdpHnaPDU3Oh1iFg46i8e+kjWYaaatS8Q',
+        'PASSWORD': env('DATABASE_PASSWORD'),
         'HOST': 'h1.host.filess.io',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {
@@ -111,6 +115,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+'django.contrib.auth.backends.ModelBackend',
+'stocks_site.authentication.EmailAuthBackend',
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -144,3 +152,11 @@ REST_FRAMEWORK = {
 'rest_framework.permissions.AllowAny'
 ]
 }
+
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST=env('EMAIL_HOST')
+EMAIL_PORT='587'
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
+RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
