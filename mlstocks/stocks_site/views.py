@@ -126,7 +126,10 @@ def forgotPassEmail(request):
         emailResetForm = ForgotPassEmailForm(request.POST)
         if emailResetForm.is_valid():
             data = emailResetForm.cleaned_data['email']
-            user = User.objects.get(email=data)
+            try:
+                user = User.objects.get(email=data)
+            except:
+                return redirect('stocks_site:forgotPassEmailDone')
             if user is not None and user.is_active:
                 subject = "Password Reset Requested"
                 email_template = "stocks_site/resetEmail.txt"
@@ -142,7 +145,7 @@ def forgotPassEmail(request):
                 email = render_to_string(email_template, email_info)
                 try:
                     send_mail(subject, email, from_email=settings.EMAIL_HOST_USER, recipient_list=[user.email], fail_silently=False)
-                except smtplib.SMTPException: # Will need to change because it will error on emails that do not exist
+                except smtplib.SMTPException:
                     return HttpResponse("Email not sent")
                 return redirect('stocks_site:forgotPassEmailDone')
     emailResetForm = ForgotPassEmailForm()
