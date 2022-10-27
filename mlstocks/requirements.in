@@ -5,3 +5,4 @@ sklearn>=0.0
 matplotlib>=3.6
 djangorestframework>=3.14.0
 azure-storage-blob>=12.14.1
+tensorflow>=2.7.0
