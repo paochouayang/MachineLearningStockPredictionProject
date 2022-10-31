@@ -16,6 +16,7 @@ from sklearn.preprocessing import MinMaxScaler
 import os
 from os.path import exists
 import pickle
+import tensorflow as tf
 
 
 
@@ -55,7 +56,7 @@ class Stocks:
             # About 7 hours in a trading day
             self.steps = 7
             self.granularity = '1h'
-            self.seg_ratio = 1
+            self.seg_ratio = 3
         if forecast_time_span == '5d':
             # About 35 hours in a 5-day trading period
             self.steps = 35
@@ -65,7 +66,7 @@ class Stocks:
             # 21 trading days in a month
             self.steps = 21
             self.granularity = '1d'
-            self.seg_ratio = 2
+            self.seg_ratio = 3
         """
         if forecast_time_span == '6mo':
             # 6 months has 26 weeks x 5 trading days
@@ -187,15 +188,14 @@ class Stocks:
         self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
-        # self.x_train, self.y_train = make_regression(n_features=4, n_informative=2, random_state=0, shuffle=False)
 
         filename = ''
         if self.forecast_time_span == '1d':
-            filename = 'random_forest_' + self.symbol.upper() + '_1day_model.sav'
+            filename = 'randomforest_1day_model.sav'
         if self.forecast_time_span == '5d':
-            filename = 'random_forest_' + self.symbol.upper() + '_5day_model.sav'
+            filename = 'randomforest_5day_model.sav'
         if self.forecast_time_span == '1mo':
-            filename = 'random_forest_' + self.symbol.upper() + '_1month_model.sav'
+            filename = 'randomforest_1month_model.sav'
 
         cwd = os.getcwd()
         if exists(cwd + '\\mlapi\\blobStorage\\' + filename):
@@ -240,20 +240,25 @@ class Stocks:
             y = np.array(y)
             return x, y
 
-        x_train, y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
+        self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
-        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-        y_train = y_train.flatten()
-        model = keras.models.Sequential()
-        model.add(LSTM(units=10, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-        model.add(LSTM(units=25))
-        model.add(Dense(units=1))
 
-        model.compile(loss="mse", optimizer='adam')
-        # model.summary()
-        model.fit(x_train, y_train, epochs=100, batch_size=1000, verbose=1, shuffle=False)
-        return model
+        folder = ''
+        if self.forecast_time_span == '1d':
+            folder = 'lstm_1day_model'
+        if self.forecast_time_span == '5d':
+            folder = 'lstm_5day_model'
+        if self.forecast_time_span == '1mo':
+            folder = 'lstm_1month_model'
+
+        cwd = os.getcwd()
+        if exists(cwd + '\\mlapi\\blobStorage\\' + folder):
+            loaded_model = tf.keras.models.load_model('mlapi/blobStorage/' + folder)
+        else:
+            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
+
+        return loaded_model
 
     def __predict(self, model, data):
         prediction = data

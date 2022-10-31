@@ -3,39 +3,88 @@
 from stockPredictTuning import Stocks
 from bestSettings import write_best_settings
 
-forecast_time_span_lst = ['1d', '5d', '1mo']
 algorithm = 'lstm'
-unit_a_lst = [10, 50, 100]
-unit_b_lst = [10, 50, 100]
-seg_ratio = [1, 2, 4, 6]
+unit_a_lst = [50, 100, 200]
+unit_b_lst = [50, 100, 200]
+unit_c_lst = [50, 100, 200]
+seg_ratio = [1, 2, 4]
 epochs_lst = [100, 200, 400]
 batch_size_lst = [200, 500, 1000]
 # Selected stocks from different price ranges.
-stocks_lst = ['PSTV', 'TWTR', 'SOFI', 'ROIV', 'TSLA', 'COMS', 'RITM', 'SWN', 'PBLA', 'APGN', 'LVLU']
+symbol_lst = ['PSTV', 'TWTR', 'SOFI', 'ROIV', 'TSLA', 'COMS', 'RITM', 'SWN', 'PBLA', 'APGN', 'LVLU']
 
-mse_list = []
-size = len(forecast_time_span_lst) * len(unit_a_lst) * len(unit_b_lst) * len(seg_ratio) * len(epochs_lst) * len(batch_size_lst)
+size = len(unit_a_lst) * len(unit_b_lst) * len(unit_c_lst) * len(seg_ratio) * len(epochs_lst) * len(batch_size_lst) * 3
 count = 1
 
-for forecast_time_span in forecast_time_span_lst:
-    for unit_a in unit_a_lst:
-        for unit_b in unit_b_lst:
+for unit_a in unit_a_lst:
+    for unit_b in unit_b_lst:
+        for unit_c in unit_c_lst:
             for ratio in seg_ratio:
                 for epochs in epochs_lst:
                     for batch_size in batch_size_lst:
-                        mse_list = []
-                        for symbol in stocks_lst:
+                        try:
                             print(f'Tuning status: {round((count / size) * 100, 2)}%')
-                            model = Stocks(symbol=symbol, algorithm=algorithm, forecast_time_span=forecast_time_span,
-                                           unit_a=unit_a, unit_b=unit_b, epochs=epochs, batch_size=batch_size,
+                            model = Stocks(symbol_lst=symbol_lst, algorithm=algorithm, forecast_time_span='1d',
+                                           unit_a=unit_a, unit_b=unit_b, unit_c=unit_c, epochs=epochs, batch_size=batch_size,
                                            seg_ratio=ratio)
-                            mse_list.append(model.get_mse())
+                            mse = model.get_mse()
                             count += 1
 
-                        average_mse = sum(mse_list) / len(mse_list)
-                        with open('LSTM_TuningResults.txt', 'a') as file:
-                            file.write(forecast_time_span + ',' + algorithm + ',' + str(average_mse) + ',' + str(unit_a) + ',' + str(
-                                unit_b) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+                            with open('LSTM_TuningResults.txt', 'a') as file:
+                                file.write('1d' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
+                                    unit_b) + ',' + str(unit_c) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+                            """
+                            if mse < min_mse:
+                                folder = 'lstm_1day_model'
+                                model.save('saved_models/' + folder)
+                            """
+                        except Exception as e:
+                            print(e)
+                            count += 1
 
-# format: forcast_time_span, algorithm, average_mse, max_depth, n_estimators, max_features, segment_ratio
+for unit_a in unit_a_lst:
+    for unit_b in unit_b_lst:
+        for unit_c in unit_c_lst:
+            for ratio in seg_ratio:
+                for epochs in epochs_lst:
+                    for batch_size in batch_size_lst:
+                        try:
+                            print(f'Tuning status: {round((count / size) * 100, 2)}%')
+                            model = Stocks(symbol_lst=symbol_lst, algorithm=algorithm, forecast_time_span='5d',
+                                           unit_a=unit_a, unit_b=unit_b, unit_c=unit_c, epochs=epochs, batch_size=batch_size,
+                                           seg_ratio=ratio)
+                            mse = model.get_mse()
+                            count += 1
+
+                            with open('LSTM_TuningResults.txt', 'a') as file:
+                                file.write('5d' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
+                                    unit_b) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+
+                        except Exception as e:
+                            print(e)
+                            count += 1
+
+for unit_a in unit_a_lst:
+    for unit_b in unit_b_lst:
+        for unit_c in unit_c_lst:
+            for ratio in seg_ratio:
+                for epochs in epochs_lst:
+                    for batch_size in batch_size_lst:
+                        try:
+                            print(f'Tuning status: {round((count / size) * 100, 2)}%')
+                            model = Stocks(symbol_lst=symbol_lst, algorithm=algorithm, forecast_time_span='1mo',
+                                           unit_a=unit_a, unit_b=unit_b, unit_c=unit_c, epochs=epochs, batch_size=batch_size,
+                                           seg_ratio=ratio)
+                            mse = model.get_mse()
+                            count += 1
+
+                            with open('LSTM_TuningResults.txt', 'a') as file:
+                                file.write('1mo' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
+                                    unit_b) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+
+                        except Exception as e:
+                            print(e)
+                            count += 1
+
+# format: forcast_time_span, algorithm, average_mse, unit_a, unit_b, unit_c, epochs, batch size, seg ratio
 write_best_settings('LSTM_TuningResults.txt')
