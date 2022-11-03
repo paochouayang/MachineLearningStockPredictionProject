@@ -15,4 +15,3 @@ def write_best_settings(path):
             file.write(str(best_settings) + '\n')
 
 
-

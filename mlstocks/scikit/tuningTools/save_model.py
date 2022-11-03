@@ -20,3 +20,25 @@ stock_obj = Stocks(symbol_lst=symbol_lst, algorithm='randomforest', forecast_tim
 model = stock_obj.get_model()
 filename = 'randomforest_1month_model.sav'
 pickle.dump(model, open('saved_models/' + filename, 'wb'))
+
+# Save LSTM model
+stock_obj = Stocks(symbol_lst=symbol_lst, algorithm='lstm', forecast_time_span='1d',
+                                           unit_a=200, unit_b=50, unit_c=50, epochs=100, batch_size=1000,
+                                           seg_ratio=4)
+model = stock_obj.get_model()
+folder = "saved_models/lstm_1day_model/"
+model.save(folder)
+
+stock_obj = Stocks(symbol_lst=symbol_lst, algorithm='lstm', forecast_time_span='5d',
+                                           unit_a=50, unit_b=100, unit_c=100, epochs=400, batch_size=1000,
+                                           seg_ratio=2)
+model = stock_obj.get_model()
+folder = "saved_models/lstm_5day_model/"
+model.save(folder)
+
+stock_obj = Stocks(symbol_lst=symbol_lst, algorithm='lstm', forecast_time_span='1mo',
+                                           unit_a=100, unit_b=100, unit_c=100, epochs=400, batch_size=1000,
+                                           seg_ratio=2)
+model = stock_obj.get_model()
+folder = "saved_models/lstm_1month_model/"
+model.save(folder)

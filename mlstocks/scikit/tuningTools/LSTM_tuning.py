@@ -33,11 +33,7 @@ for unit_a in unit_a_lst:
                             with open('LSTM_TuningResults.txt', 'a') as file:
                                 file.write('1d' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
                                     unit_b) + ',' + str(unit_c) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
-                            """
-                            if mse < min_mse:
-                                folder = 'lstm_1day_model'
-                                model.save('saved_models/' + folder)
-                            """
+
                         except Exception as e:
                             print(e)
                             count += 1
@@ -58,7 +54,7 @@ for unit_a in unit_a_lst:
 
                             with open('LSTM_TuningResults.txt', 'a') as file:
                                 file.write('5d' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
-                                    unit_b) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+                                    unit_b) + ',' + str(unit_c) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
 
                         except Exception as e:
                             print(e)
@@ -80,7 +76,7 @@ for unit_a in unit_a_lst:
 
                             with open('LSTM_TuningResults.txt', 'a') as file:
                                 file.write('1mo' + ',' + algorithm + ',' + str(mse) + ',' + str(unit_a) + ',' + str(
-                                    unit_b) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
+                                    unit_b) + ',' + str(unit_c) + ',' + str(epochs) + ',' + str(batch_size) + ',' + str(ratio) + '\n')
 
                         except Exception as e:
                             print(e)
