@@ -60,6 +60,19 @@ class ForgotPassDone(View):
     def get(self,request):
         return render(request, 'stocks_site/forgotPassDone.html')
 
+class ActivateAccount(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64)
+            user = User.objects.get(pk=uid)
+        except:
+            return redirect('/')
+        if user is not None and default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return render(request, 'stocks_site/activateAccount.html')
+        return redirect('/')
+
 @login_required
 def stockPredict(request):
     if request.method == 'POST':
@@ -108,9 +121,28 @@ def register(request):
             # Set the chosen password
             new_user.set_password(user_form.cleaned_data['password'])
             # Save the User object
+            new_user.is_active = False
+
             new_user.save()
-            return render(request,
-                            'stocks_site/createAccountDone.html')
+
+            subject = "MLStocks Account Activation"
+            email_template = "stocks_site/activationEmail.txt"
+            email_info = {
+                "email":new_user.email,
+                'domain':'127.0.0.1:8000',
+                'site_name': 'MLStocks',
+                "uid": urlsafe_base64_encode(force_bytes(new_user.pk)),
+                "user": new_user,
+                'token': default_token_generator.make_token(new_user),
+                'protocol': 'http'
+                }
+            email = render_to_string(email_template, email_info)
+            try:
+                send_mail(subject, email, from_email=settings.EMAIL_HOST_USER, recipient_list=[new_user.email], fail_silently=False)
+            except smtplib.SMTPException:
+                return HttpResponse("Email not sent")
+
+            return redirect('stocks_site:createAccountDone')
     else:
         user_form = UserRegistrationForm()
     return render(request,
