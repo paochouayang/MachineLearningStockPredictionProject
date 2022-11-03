@@ -13,5 +13,6 @@ urlpatterns = [
     path('activate/<str:uidb64>/<str:token>/', views.ActivateAccount.as_view(), name="activateAccount"),
     path('main', views.stockPredict, name="main"),
     path('forgotPassEmailDone', views.ForgotPassEmailDone.as_view(), name="forgotPassEmailDone"),
-    path('forgotPassDone', views.ForgotPassDone.as_view(), name="forgotPassDone")
+    path('forgotPassDone', views.ForgotPassDone.as_view(), name="forgotPassDone"),
+    path('manageAccount', views.manageAccount, name="manageAccount")
 ]

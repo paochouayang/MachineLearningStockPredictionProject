@@ -122,3 +122,40 @@ class UserRegistrationForm(ModelForm):
 
 class StocksForm(Form):
     ticker = forms.CharField()
+
+class AccountManagementForm(ModelForm):    
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+        widgets = { 
+            'username': TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'UserName'
+            }),
+            'first_name' : TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'FirstName'
+            }),
+            'last_name' : TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'LastName'
+            }),
+            'email': EmailInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'name@example.com'
+            })
+        }
+        labels = {
+            'username': "",
+            'first_name': "",
+            'last_name': "",
+            'email': ""
+        }
+        help_texts = {
+            'username':None,
+        }
