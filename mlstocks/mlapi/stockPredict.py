@@ -67,7 +67,7 @@ class Stocks:
             if self.algorithm == 'randomforest':
                 self.seg_ratio = 2
             if self.algorithm == 'lstm':
-                self.seg_ratio = 2
+                self.seg_ratio = 4
         if forecast_time_span == '1mo':
             # 21 trading days in a month
             self.steps = 21
@@ -75,7 +75,7 @@ class Stocks:
             if self.algorithm == 'randomforest':
                 self.seg_ratio = 3
             if self.algorithm == 'lstm':
-                self.seg_ratio = 2
+                self.seg_ratio = 4
         """
         if forecast_time_span == '6mo':
             # 6 months has 26 weeks x 5 trading days

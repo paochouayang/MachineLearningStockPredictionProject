@@ -15,7 +15,7 @@ symbol_lst = ['PSTV', 'TWTR', 'SOFI', 'ROIV', 'TSLA', 'COMS', 'RITM', 'SWN', 'PB
 
 size = len(unit_a_lst) * len(unit_b_lst) * len(unit_c_lst) * len(seg_ratio) * len(epochs_lst) * len(batch_size_lst) * 3
 count = 1
-
+"""
 for unit_a in unit_a_lst:
     for unit_b in unit_b_lst:
         for unit_c in unit_c_lst:
@@ -59,7 +59,7 @@ for unit_a in unit_a_lst:
                         except Exception as e:
                             print(e)
                             count += 1
-
+"""
 for unit_a in unit_a_lst:
     for unit_b in unit_b_lst:
         for unit_c in unit_c_lst:
