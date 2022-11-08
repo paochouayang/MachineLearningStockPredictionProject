@@ -13,12 +13,10 @@ def uploadToBlobStorage(file_path, file_name):
         blob_client.upload_blob(data, overwrite=True)
     print(f"Uploaded {file_name}.")
 
+# wrap this in a try except block to catch blob_name errors
 def downloadFromBlobStorage(blob_name):
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
     blob_data = blob_client.download_blob()
     data = blob_data.readall()
-    print(data)
-
-uploadToBlobStorage("F:/Users/nshepard/Documents/MyWebSites/MachineLearningStockPredictionProject/mlstocks/mlapi/blobStorage/test.txt", "test.txt")
-downloadFromBlobStorage('test.txt')
+    return data

@@ -44,6 +44,7 @@ class ForgotPassEmailForm(Form):
                             }))
 
 class UserRegistrationForm(ModelForm):
+
     password = forms.CharField(label='',
                                 widget=forms.PasswordInput(attrs={
                                     'class': "form-control",
@@ -59,7 +60,7 @@ class UserRegistrationForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'email')
+        fields = ('username', 'first_name', 'last_name', 'email')
         widgets = {
             'username': TextInput(attrs={
                 'class': "form-control",
@@ -71,6 +72,11 @@ class UserRegistrationForm(ModelForm):
                 'id': 'floatingInput',
                 'placeholder': 'FirstName'
             }),
+            'last_name': TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'LastName'
+            }),
             'email': EmailInput(attrs={
                 'class': "form-control",
                 'id': 'floatingInput',
@@ -80,17 +86,76 @@ class UserRegistrationForm(ModelForm):
         labels = {
             'username': "",
             'first_name': "",
+            'last_name': "",
             'email': ""
         }
         help_texts = {
             'username':None,
 
         }
+
     def clean_password2(self):
         cd = self.cleaned_data
+        if self.all_required(cd):
+            raise forms.ValidationError('All fields required')
+        if self.account_exists(cd):
+            raise forms.ValidationError('Username or email already exists.')
         if cd['password'] != cd['password2']:
             raise forms.ValidationError('Passwords don\'t match.')
         return cd['password2']
 
+    def account_exists(self, cd):
+        try:
+            User.objects.get(username=cd['username'])
+        except User.DoesNotExist:
+            try:
+                User.objects.get(email=cd['email'])
+            except User.DoesNotExist:
+                return False
+        return True    
+
+    def all_required(self, cd):
+        for k,v in cd.items():
+            if v == '':
+                return True
+        return False
+
 class StocksForm(Form):
     ticker = forms.CharField()
+
+class AccountManagementForm(ModelForm):    
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+        widgets = { 
+            'username': TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'UserName'
+            }),
+            'first_name' : TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'FirstName'
+            }),
+            'last_name' : TextInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'LastName'
+            }),
+            'email': EmailInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'name@example.com'
+            })
+        }
+        labels = {
+            'username': "",
+            'first_name': "",
+            'last_name': "",
+            'email': ""
+        }
+        help_texts = {
+            'username':None,
+        }
