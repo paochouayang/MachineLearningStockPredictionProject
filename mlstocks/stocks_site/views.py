@@ -53,6 +53,14 @@ class ForgotPassEmailDone(View):
     def get(self,request):
         return render(request, 'stocks_site/forgotPassEmailDone.html')
 
+class RandomForestDis(View):
+    def get(self,request):
+        return render(request, 'stocks_site/RandomForestDis.html')
+
+class LSTMDis(View):
+    def get(self,request):
+        return render(request, 'stocks_site/LSTMDis.html')
+
 class ForgotPassDone(View):
     def get(self,request):
         return render(request, 'stocks_site/forgotPassDone.html')
@@ -200,7 +208,7 @@ def forgotPassEmail(request):
                 try:
                     send_mail(subject, email, from_email=settings.EMAIL_HOST_USER, recipient_list=[user.email], fail_silently=False)
                 except smtplib.SMTPException:
-                    return HttpResponse("Email not sent")
+                    return redirect('stocks_site:forgotPassEmailDone')
                 return redirect('stocks_site:forgotPassEmailDone')
     emailResetForm = forms.ForgotPassEmailForm()
     return render(request, 'stocks_site/forgotPassEmail.html', {'emailResetForm': emailResetForm})
