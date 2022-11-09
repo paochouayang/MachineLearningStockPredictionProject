@@ -71,8 +71,20 @@ class ActivateAccount(View):
 
 @login_required
 def manageAccount(request):
-
-    account_form = forms.AccountManagementForm(initial={'username':request.user.username, 'first_name':request.user.first_name, 'last_name':request.user.last_name, 'email':request.user.email})
+    if request.method == "POST":
+        account_form = forms.AccountManagementForm(request.POST)
+        if account_form.is_valid():
+            first_name = account_form.cleaned_data['first_name']
+            last_name = account_form.cleaned_data['last_name']
+            try:
+                CurrentUser = User.objects.get(id=request.user.id)
+            except:
+                redirect('stocks_site:login')
+            CurrentUser.first_name = first_name
+            CurrentUser.last_name = last_name
+            CurrentUser.save()
+    else:
+        account_form = forms.AccountManagementForm(initial={'username':request.user.username, 'first_name':request.user.first_name, 'last_name':request.user.last_name, 'email':request.user.email})
     return render(request,
                 'stocks_site/manageAccount.html',
                 {'account_form': account_form})
@@ -94,7 +106,6 @@ def stockPredict(request):
         stockForm = forms.StocksForm()
     return render(request, 'stocks_site/main.html', {'stockForm': stockForm})
     
-
 def user_login(request):
     message = ""
     if request.method == 'POST':
