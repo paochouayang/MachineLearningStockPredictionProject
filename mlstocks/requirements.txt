@@ -8,6 +8,8 @@ absl-py==1.3.0
     # via
     #   tensorboard
     #   tensorflow
+anyio==3.6.2
+    # via httpcore
 asgiref==3.5.2
     # via django
 astunparse==1.6.3
@@ -22,6 +24,8 @@ cachetools==5.2.0
     # via google-auth
 certifi==2022.9.24
     # via
+    #   httpcore
+    #   httpx
     #   msrest
     #   requests
 cffi==1.15.1
@@ -60,10 +64,19 @@ grpcio==1.50.0
     # via
     #   tensorboard
     #   tensorflow
+h11==0.12.0
+    # via httpcore
 h5py==3.7.0
     # via tensorflow
+httpcore==0.15.0
+    # via httpx
+httpx==0.23.0
+    # via -r requirements.in
 idna==3.4
-    # via requests
+    # via
+    #   anyio
+    #   requests
+    #   rfc3986
 isodate==0.6.1
     # via msrest
 joblib==1.2.0
@@ -150,6 +163,8 @@ requests-oauthlib==1.3.1
     # via
     #   google-auth-oauthlib
     #   msrest
+rfc3986[idna2008]==1.5.0
+    # via httpx
 rsa==4.9
     # via google-auth
 scikit-learn==1.1.2
@@ -169,6 +184,11 @@ six==1.16.0
     #   tensorflow
 sklearn==0.0
     # via -r requirements.in
+sniffio==1.3.0
+    # via
+    #   anyio
+    #   httpcore
+    #   httpx
 sqlparse==0.4.2
     # via django
 tensorboard==2.10.1

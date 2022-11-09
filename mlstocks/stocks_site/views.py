@@ -12,7 +12,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from . import forms
-import requests, json
+import httpx, requests, json
+from asgiref.sync import sync_to_async, async_to_sync
 
 
 # Create your views here.
@@ -89,14 +90,20 @@ def manageAccount(request):
                 'stocks_site/manageAccount.html',
                 {'account_form': account_form})
 
+@sync_to_async
 @login_required
-def stockPredict(request):
+@async_to_sync
+async def stockPredict(request):
     if request.method == 'POST':
         stockForm = forms.StocksForm(request.POST)
         if stockForm.is_valid(): 
             input = stockForm.cleaned_data
             symbol = {'ticker':input['ticker']}
-            response = requests.get(f'http://127.0.0.1:8000/api/', params=symbol)
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(f'http://127.0.0.1:8000/api/', params=symbol, timeout=None)
+            except httpx.ReadTimeout:
+                pass
             response_dict = json.loads(response.text)
 
             graphic = response_dict['Prediction']
