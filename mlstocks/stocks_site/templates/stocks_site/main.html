@@ -2,11 +2,12 @@
 {% block title %}Main Page{% endblock %}
 {% block content %}
 <div class="spacer"></div>
-    <main class="home-main">
-        <div class="btn-group">
+    <div class="btn-group dropdown">
             <a class="w-100 mb-1 btn btn-lg btn-primary" onclick="window.location.href='/RandomForestDis';">More on Random Forest ML</a>
             <a class="w-100 mb-1 btn btn-lg btn-primary" onclick="window.location.href='/LSTMDis';">More on LSTM ML</a>
-        </div>
+            <a class="w-100 mb-1 btn btn-lg btn-primary dropbtn">Favorites</a>
+    </div>
+    <main class="home-main">
         <form class="m-auto home-form" method="post">
             {% load static %}
             <img class="mb-4 home-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo">
