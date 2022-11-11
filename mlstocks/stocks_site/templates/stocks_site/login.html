@@ -6,8 +6,7 @@
         <form method="post">
         {% load static %}
         <img class="mb-4 login-logo" src="{% static 'img/MLStocks.png' %}" alt="MLStocks logo">
-        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-        
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>       
             {{ form.as_p }}
             {% csrf_token %}
             {% if message %}
