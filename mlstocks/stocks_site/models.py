@@ -1,5 +1,6 @@
 from django.db import models
 
-# Create your models here.
-
+class Tickers(models.Model):
+    ticker = models.CharField(max_length=8)
+    description = models.CharField(max_length=300)
 
