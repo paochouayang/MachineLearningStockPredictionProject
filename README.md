@@ -2,7 +2,7 @@
 
 requirements.txt generated using pip-compile https://github.com/jazzband/pip-tools
 
-To install dependencies use code below while in the top level of the project.
+To install dependencies use code below while in the same level as the requirements.txt file.
 ```
 pip install -r requirements.txt
 ```
@@ -43,11 +43,11 @@ pip install -r requirements.txt
 <summary>Done</summary>
 
 - works with correctly input tickers
+- Implement behind seperate API
+- Fine tune for better results
 </details>
 
 - TODO    
-    - Implement behind seperate API
-    - Fine tune for better results
     - Add ticker validation
 
 ## Main page with working input
@@ -55,11 +55,11 @@ pip install -r requirements.txt
 <summary>Done</summary>
 
 - UI implemented
-- Input form runs ML
+- Input form runs ML    
+- protect from non logged in users
 </details>
 
 - TODO
-    - protect from non logged in users
     - Create description of algorithm (maybe its own page?)
         - Could become dropdown to select between various settings and/or ML algos
     - save tickers and results

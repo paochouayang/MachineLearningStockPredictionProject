@@ -6,11 +6,11 @@
     <div class="spacer"></div>
     <main class="m-auto login-main">
         <form method="post">
-            <h1 class="h3 mb-3 fw-normal">Reset Password</h1>
-            {% comment %} <img class="mb-4" src="/docs/5.2/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> {% endcomment %}
+            <h1 class="h3 mb-3 fw-normal">Enter Email to Receive Reset Password Link</h1>
 
-            {{ forgotform.as_p }}
+            {{ emailResetForm.as_p }}
             {% csrf_token %}
+
 
             <button class="w-100 mb-1 btn btn-lg btn-primary" type="submit">Submit</button>
             <a class="w-100 btn btn-lg btn-primary" onclick="window.location.href='/';">Back</a>

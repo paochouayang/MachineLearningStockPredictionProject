@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hello,
+
+To activate your account click the link below.
+
+{{ protocol }}://{{ domain }}{% url 'stocks_site:activateAccount' uidb64=uid token=token %}
+
+If you did not make this request, you can simply ignore this email.
+
+Sincerely,
+The MLStocks Team
+
+{% endautoescape %}

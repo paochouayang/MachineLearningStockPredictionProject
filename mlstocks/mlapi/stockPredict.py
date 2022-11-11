@@ -1,17 +1,23 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import datetime
 from datetime import date
 import yfinance as yf
 import numpy as np
+from io import BytesIO
+import base64
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
 import pandas as pd
-import pickle
-from os.path import exists
-import os
 import tensorflow.keras as keras
 from keras.layers import LSTM, Dense, Dropout
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import RandomForestRegressor
+import os
+from os.path import exists
+import pickle
+import tensorflow as tf
+
 
 
 class Stocks:
@@ -21,7 +27,6 @@ class Stocks:
         self.data_points = 1000
         self.forecast_time_span = forecast_time_span
         self.delta_days = 720
-        self.seg_ratio = None
         self.training_segment = None
         self.start = None
         self.end = None
@@ -32,6 +37,7 @@ class Stocks:
         self.x_test = None
         self.y_test = None
         self.steps = None
+        self.plot = None
 
         if algorithm in ['randomforest', 'lstm']:
             self.algorithm = algorithm
@@ -50,17 +56,26 @@ class Stocks:
             # About 7 hours in a trading day
             self.steps = 7
             self.granularity = '1h'
-            self.seg_ratio = 1
+            if self.algorithm == 'randomforest':
+                self.seg_ratio = 3
+            if self.algorithm == 'lstm':
+                self.seg_ratio = 4
         if forecast_time_span == '5d':
             # About 35 hours in a 5-day trading period
             self.steps = 35
             self.granularity = '1h'
-            self.seg_ratio = 2
+            if self.algorithm == 'randomforest':
+                self.seg_ratio = 2
+            if self.algorithm == 'lstm':
+                self.seg_ratio = 4
         if forecast_time_span == '1mo':
             # 21 trading days in a month
             self.steps = 21
             self.granularity = '1d'
-            self.seg_ratio = 2
+            if self.algorithm == 'randomforest':
+                self.seg_ratio = 3
+            if self.algorithm == 'lstm':
+                self.seg_ratio = 4
         """
         if forecast_time_span == '6mo':
             # 6 months has 26 weeks x 5 trading days
@@ -73,9 +88,11 @@ class Stocks:
             self.granularity = '1d'
             self.delta_days = 4000
         """
+
         self.training_segment = self.seg_ratio * self.steps
 
     def forecast(self):
+        plt.cla()
         model = self.__train()
         price_data = self.data.iloc[:]['Open'].values
         x_predict = np.array(price_data[-self.training_segment:]).reshape(1, -1)
@@ -103,26 +120,40 @@ class Stocks:
 
         plt.plot(extend_x_axis(), prediction, label='Prediction', color='red')
         self.data['Open'][-(self.training_segment + self.steps):].plot(label='Historical Data', color='blue')
-        plt.title('Prediction for stock: ' + self.symbol)
         plt.legend(loc='lower left')
-        plt.show()
+
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_png = buffer.getvalue()
+        buffer.close()
+
+        graphic = base64.b64encode(image_png)
+        graphic = graphic.decode('utf-8')
+        self.plot = graphic
         return prediction
 
     def forecast_test(self):
+        plt.cla()      
         model = self.__train()
         prediction = self.__predict(model, self.x_test)
-        mse = mean_squared_error(self.y_test, prediction)
-        print(f"Mean Squared Error: {mse}")
-        plt.plot(self.data.index[-self.steps:], prediction, label='Prediction data', color='red')
-        self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data', color='blue')
-        self.data['Open'][-self.steps:].plot(label='Testing data', color='green')
-        plt.title('Prediction for stock: ' + self.symbol)
-        plt.legend(loc='lower left')
-        plt.show()
+        self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data')
+        self.data['Open'][-self.steps:].plot(label='Testing data')
+        plt.plot(self.data.index[-self.steps:], prediction, label='Prediction data')
+        plt.legend(loc='upper center')
+
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_png = buffer.getvalue()
+        buffer.close()
+
+        graphic = base64.b64encode(image_png)
+        graphic = graphic.decode('utf-8')
+        self.plot = graphic
         return prediction
 
     def __train(self):
-        model = None
         if self.algorithm == 'randomforest':
             model = self.__random_forest()
         if self.algorithm == 'lstm':
@@ -167,16 +198,21 @@ class Stocks:
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
 
-        # self.x_train, self.y_train = make_regression(n_features=4, n_informative=2, random_state=0, shuffle=False)
+        filename = ''
         if self.forecast_time_span == '1d':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features='log2')
+            filename = 'randomforest_1day_model.sav'
         if self.forecast_time_span == '5d':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=50, max_features=None)
+            filename = 'randomforest_5day_model.sav'
         if self.forecast_time_span == '1mo':
-            model = RandomForestRegressor(max_depth=10, random_state=123, n_estimators=100, max_features='sqrt')
-        model.fit(self.x_train, self.y_train)
+            filename = 'randomforest_1month_model.sav'
 
-        return model
+        cwd = os.getcwd()
+        if exists(cwd + '\\mlapi\\blobStorage\\' + filename):
+            loaded_model = pickle.load(open('mlapi/blobStorage/' + filename, 'rb'))
+        else:
+            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
+
+        return loaded_model
 
     def __lstm(self):
         delta = datetime.timedelta(days=self.delta_days)
@@ -213,20 +249,25 @@ class Stocks:
             y = np.array(y)
             return x, y
 
-        x_train, y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
+        self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
-        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-        y_train = y_train.flatten()
-        model = keras.models.Sequential()
-        model.add(LSTM(units=10, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-        model.add(LSTM(units=25 ))
-        model.add(Dense(units=1))
 
-        model.compile(loss="mse", optimizer='adam')
-        # model.summary()
-        model.fit(x_train, y_train, epochs=100, batch_size=1000, verbose=1, shuffle=False)
-        return model
+        folder = ''
+        if self.forecast_time_span == '1d':
+            folder = 'lstm_1day_model'
+        if self.forecast_time_span == '5d':
+            folder = 'lstm_5day_model'
+        if self.forecast_time_span == '1mo':
+            folder = 'lstm_1month_model'
+
+        cwd = os.getcwd()
+        if exists(cwd + '\\mlapi\\blobStorage\\' + folder):
+            loaded_model = tf.keras.models.load_model('mlapi/blobStorage/' + folder)
+        else:
+            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
+
+        return loaded_model
 
     def __predict(self, model, data):
         prediction = data
