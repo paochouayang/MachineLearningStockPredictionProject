@@ -106,10 +106,16 @@ async def stockPredict(request):
         stockForm = forms.StocksForm(request.POST)
         if stockForm.is_valid(): 
             input = stockForm.cleaned_data
-            symbol = {'ticker':input['ticker']}
+            param = {
+                'ticker': input['ticker'],
+                'algorithm': input['algorithm'],
+                'forecast': input['forecast'],
+                'usage': input['usage']
+            }
+
             try:
                 async with httpx.AsyncClient() as client:
-                    response = await client.get(f'http://127.0.0.1:8000/api/', params=symbol, timeout=None)
+                    response = await client.get(f'http://127.0.0.1:8000/api/', params=param, timeout=None)
             except httpx.ReadTimeout:
                 pass
             response_dict = json.loads(response.text)
