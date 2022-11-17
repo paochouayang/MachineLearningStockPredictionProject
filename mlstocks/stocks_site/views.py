@@ -107,9 +107,10 @@ async def stockPredict(request):
         stockForm = forms.StocksForm(request.POST)
         if stockForm.is_valid():
             input = stockForm.cleaned_data
-            #if not Tickers.objects.filter(ticker=input['ticker']).exists():
-            #    message = 'Ticker not available'
-            #    return render(request, 'stocks_site/main.html', {'stockForm': stockForm, 'message': message})
+            doesExist = await ticker_exists(input['ticker'])
+            if not doesExist:
+                message = 'Ticker not available'
+                return render(request, 'stocks_site/main.html', {'stockForm': stockForm, 'message': message})
             param = {
                 'ticker': input['ticker'],
                 'algorithm': input['algorithm'],
@@ -122,6 +123,7 @@ async def stockPredict(request):
                     response = await client.get(f'http://127.0.0.1:8000/api/', params=param, timeout=None)
             except httpx.ReadTimeout:
                 pass
+            # response = requests.get(f'http://127.0.0.1:8000/api/', params=symbol)
             response_dict = json.loads(response.text)
 
             graphic = response_dict['Prediction']
@@ -130,6 +132,10 @@ async def stockPredict(request):
     else:
         stockForm = forms.StocksForm()
     return render(request, 'stocks_site/main.html', {'stockForm': stockForm})
+
+@sync_to_async
+def ticker_exists(inputTicker):
+    return Tickers.objects.filter(ticker=inputTicker).exists()
     
 def user_login(request):
     message = ""
