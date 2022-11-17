@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from . import forms
 import httpx, requests, json
 from asgiref.sync import sync_to_async, async_to_sync
+from .models import Tickers
 
 
 # Create your views here.
@@ -104,8 +105,11 @@ def manageAccount(request):
 async def stockPredict(request):
     if request.method == 'POST':
         stockForm = forms.StocksForm(request.POST)
-        if stockForm.is_valid(): 
+        if stockForm.is_valid():
             input = stockForm.cleaned_data
+            #if not Tickers.objects.filter(ticker=input['ticker']).exists():
+            #    message = 'Ticker not available'
+            #    return render(request, 'stocks_site/main.html', {'stockForm': stockForm, 'message': message})
             param = {
                 'ticker': input['ticker'],
                 'algorithm': input['algorithm'],
