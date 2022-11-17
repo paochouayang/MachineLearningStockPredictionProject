@@ -79,6 +79,20 @@ class ActivateAccount(View):
             return render(request, 'stocks_site/activateAccount.html')
         return redirect('/')
 
+class UpdateAccount(View):
+    def get(self, request, uidb64, token, uidb642):
+        try:
+            uid = urlsafe_base64_decode(uidb64)
+            user = User.objects.get(pk=uid)
+            newEmail = str(urlsafe_base64_decode(uidb642), 'UTF-8')
+        except:
+            return redirect('/')
+        if user is not None and default_token_generator.check_token(user, token):
+            user.email = newEmail
+            user.save()
+            return render(request, 'stocks_site/updatedAccount.html')
+        return redirect('/')
+
 @login_required
 def manageAccount(request):
     if request.method == "POST":
@@ -86,13 +100,52 @@ def manageAccount(request):
         if account_form.is_valid():
             first_name = account_form.cleaned_data['first_name']
             last_name = account_form.cleaned_data['last_name']
+            newEmail = account_form.cleaned_data['email']
             try:
                 CurrentUser = User.objects.get(id=request.user.id)
             except:
                 redirect('stocks_site:login')
-            CurrentUser.first_name = first_name
-            CurrentUser.last_name = last_name
-            CurrentUser.save()
+            if CurrentUser.email != newEmail:
+                try:
+                    User.objects.get(email=newEmail)
+                except:       
+                    if CurrentUser.email != newEmail:
+                        subject = "MLStocks Email Update"
+                        email_template = "stocks_site/updateEmail.txt"
+                        email_info = {
+                            "email":newEmail,
+                            'domain':'127.0.0.1:8000',
+                            'site_name': 'MLStocks',
+                            "uid": urlsafe_base64_encode(force_bytes(CurrentUser.pk)),
+                            "user": CurrentUser,
+                            'token': default_token_generator.make_token(CurrentUser),
+                            'uidemail': urlsafe_base64_encode(force_bytes(newEmail)),
+                            'protocol': 'http'
+                            }
+                        email = render_to_string(email_template, email_info)
+                        try:
+                            send_mail(subject, email, from_email=settings.EMAIL_HOST_USER, recipient_list=[newEmail], fail_silently=False)
+                        except smtplib.SMTPException:
+                            return HttpResponse("Email not sent")
+                    CurrentUser.first_name = first_name
+                    CurrentUser.last_name = last_name
+                    CurrentUser.save()
+                    message = 'Account updated successfully, email changes will require activation via the link sent to the new email.'
+                    return render(request, 'stocks_site/manageAccount.html',
+                        {'account_form': account_form, 'message': message})
+                alert = 'Account already associated with that email'
+                return render(request, 'stocks_site/manageAccount.html',
+                        {'account_form': account_form, 'alert': alert})   
+            else:
+                CurrentUser.first_name = first_name
+                CurrentUser.last_name = last_name
+                CurrentUser.save()
+                message = 'Account updated successfully.'
+                return render(request, 'stocks_site/manageAccount.html',
+                    {'account_form': account_form, 'message': message})
+        alert = 'Invalid changes.'
+        return render(request, 'stocks_site/manageAccount.html',
+            {'account_form': account_form, 'alert': alert})
     else:
         account_form = forms.AccountManagementForm(initial={'username':request.user.username, 'first_name':request.user.first_name, 'last_name':request.user.last_name, 'email':request.user.email})
     return render(request,

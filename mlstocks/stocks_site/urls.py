@@ -16,5 +16,6 @@ urlpatterns = [
     path('forgotPassDone', views.ForgotPassDone.as_view(), name="forgotPassDone"),
     path('manageAccount', views.manageAccount, name="manageAccount"),
     path('RandomForestDis', views.RandomForestDis.as_view(), name="randomForestDis"),
-    path('LSTMDis', views.LSTMDis.as_view(), name="LSTMDis")
+    path('LSTMDis', views.LSTMDis.as_view(), name="LSTMDis"),
+    path('update/<str:uidb64>/<str:token>/<str:uidb642>/', views.UpdateAccount.as_view(), name="updateEmail")
 ]

@@ -184,6 +184,7 @@ cython_debug/
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/
+.vscode/
 
 # AWS User-specific
 .idea/**/aws.xml

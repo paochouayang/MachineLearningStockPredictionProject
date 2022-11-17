@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hello,
+
+To confirm your updated email click the link below.
+
+{{ protocol }}://{{ domain }}{% url 'stocks_site:updateEmail' uidb64=uid token=token uidb642=uidemail %}
+
+If you did not make this request, you can simply ignore this email.
+
+Sincerely,
+The MLStocks Team
+
+{% endautoescape %}

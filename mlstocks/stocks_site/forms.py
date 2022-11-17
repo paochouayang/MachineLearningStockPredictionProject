@@ -143,7 +143,7 @@ class AccountManagementForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name')
+        fields = ('first_name', 'last_name', 'email')
         widgets = { 
             'first_name' : TextInput(attrs={
                 'class': "form-control",
@@ -154,9 +154,15 @@ class AccountManagementForm(ModelForm):
                 'class': "form-control",
                 'id': 'floatingInput',
                 'placeholder': 'LastName'
+            }),
+            'email': EmailInput(attrs={
+                'class': "form-control",
+                'id': 'floatingInput',
+                'placeholder': 'name@example.com'
             })
         }
         labels = {
             'first_name': "",
-            'last_name': ""
+            'last_name': "",
+            'email': ""
         }
