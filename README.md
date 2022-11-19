@@ -20,12 +20,10 @@ pip install -r requirements.txt
 <details>
 <summary>Done</summary>
 
-- UI implemented
+- UI implemented   
+- implement logic
+- email integration
 </details>
-
-- TODO    
-    - implement logic
-    - email integration
 
 ## create account 
 <details>
@@ -33,10 +31,8 @@ pip install -r requirements.txt
 
 - UI implemented
 - Integrated with db
+- email integration
 </details>
-
-- TODO  
-    - email integration
 
 ## ML intro using scikit 
 <details>
@@ -45,10 +41,9 @@ pip install -r requirements.txt
 - works with correctly input tickers
 - Implement behind seperate API
 - Fine tune for better results
+- Add ticker validation
 </details>
 
-- TODO    
-    - Add ticker validation
 
 ## Main page with working input
 <details>
@@ -57,31 +52,27 @@ pip install -r requirements.txt
 - UI implemented
 - Input form runs ML    
 - protect from non logged in users
+- Could become dropdown to select between various settings and/or ML algos
 </details>
 
 - TODO
-    - Create description of algorithm (maybe its own page?)
-        - Could become dropdown to select between various settings and/or ML algos
+    - Create description of algorithm (maybe its own page?)        
     - save tickers and results
     
 ## Account management
 <details>
 <summary>Done</summary>
 
-
+- Add account maintenance screen
 </details>
-
-- TODO
-    - Add account maintenance screen
     
 ## Overall
 <details>
 <summary>Done</summary>
 
-
+- Add navbar
+- Add account maintenance screen
 </details>
 
 - TODO
     - Continue to refine look and feel of website
-    - Add navbar
-    - Add account maintenance screen
