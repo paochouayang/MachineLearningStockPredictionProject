@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import datetime
@@ -7,26 +8,18 @@ import yfinance as yf
 import numpy as np
 from io import BytesIO
 import base64
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
 import pandas as pd
-import tensorflow.keras as keras
-from keras.layers import LSTM, Dense, Dropout
 from sklearn.preprocessing import MinMaxScaler
-import os
-from os.path import exists
-import pickle
-import tensorflow as tf
-
 
 
 class Stocks:
-    def __init__(self, symbol, algorithm, forecast_time_span):
+    def __init__(self, symbol, algorithm, forecast_time_span, model):
         self.symbol = symbol
         self.algorithm = algorithm
         self.data_points = 1000
         self.forecast_time_span = forecast_time_span
         self.delta_days = 720
+        self.model = model
         self.training_segment = None
         self.start = None
         self.end = None
@@ -76,24 +69,13 @@ class Stocks:
                 self.seg_ratio = 3
             if self.algorithm == 'lstm':
                 self.seg_ratio = 4
-        """
-        if forecast_time_span == '6mo':
-            # 6 months has 26 weeks x 5 trading days
-            self.steps = 130
-            self.granularity = '1d'
-            self.delta_days = 4000
-        if forecast_time_span == '1y':
-            # 1 year has 52 weeks x 5 trading days
-            self.steps = 260
-            self.granularity = '1d'
-            self.delta_days = 4000
-        """
 
         self.training_segment = self.seg_ratio * self.steps
 
     def forecast(self):
         plt.cla()
-        model = self.__train()
+        self.__create_data()
+        model = self.model
         price_data = self.data.iloc[:]['Open'].values
         x_predict = np.array(price_data[-self.training_segment:]).reshape(1, -1)
         prediction = self.__predict(model, x_predict)
@@ -134,13 +116,14 @@ class Stocks:
         return prediction
 
     def forecast_test(self):
-        plt.cla()      
-        model = self.__train()
+        plt.cla()
+        self.__create_data()
+        model = self.model
         prediction = self.__predict(model, self.x_test)
         self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data')
         self.data['Open'][-self.steps:].plot(label='Testing data')
         plt.plot(self.data.index[-self.steps:], prediction, label='Prediction data')
-        plt.legend(loc='upper center')
+        plt.legend(loc='lower left')
 
         buffer = BytesIO()
         plt.savefig(buffer, format='png')
@@ -153,14 +136,13 @@ class Stocks:
         self.plot = graphic
         return prediction
 
-    def __train(self):
+    def __create_data(self):
         if self.algorithm == 'randomforest':
-            model = self.__random_forest()
+            self.__create_lstm_data()
         if self.algorithm == 'lstm':
-            model = self.__lstm()
-        return model
+            self.__create_random_forest_data()
 
-    def __random_forest(self):
+    def __create_random_forest_data(self):
         delta = datetime.timedelta(days=self.delta_days)
         start_date = date.today() - delta
         end_date = date.today()
@@ -198,23 +180,7 @@ class Stocks:
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
 
-        filename = ''
-        if self.forecast_time_span == '1d':
-            filename = 'randomforest_1day_model.sav'
-        if self.forecast_time_span == '5d':
-            filename = 'randomforest_5day_model.sav'
-        if self.forecast_time_span == '1mo':
-            filename = 'randomforest_1month_model.sav'
-
-        cwd = os.getcwd()
-        if exists(cwd + '\\mlapi\\blobStorage\\' + filename):
-            loaded_model = pickle.load(open('mlapi/blobStorage/' + filename, 'rb'))
-        else:
-            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
-
-        return loaded_model
-
-    def __lstm(self):
+    def __create_lstm_data(self):
         delta = datetime.timedelta(days=self.delta_days)
         start_date = date.today() - delta
         end_date = date.today()
@@ -252,22 +218,6 @@ class Stocks:
         self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
         self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
         self.y_test = np.array(price_data[-self.steps:])
-
-        folder = ''
-        if self.forecast_time_span == '1d':
-            folder = 'lstm_1day_model'
-        if self.forecast_time_span == '5d':
-            folder = 'lstm_5day_model'
-        if self.forecast_time_span == '1mo':
-            folder = 'lstm_1month_model'
-
-        cwd = os.getcwd()
-        if exists(cwd + '\\mlapi\\blobStorage\\' + folder):
-            loaded_model = tf.keras.models.load_model('mlapi/blobStorage/' + folder)
-        else:
-            raise Exception('Saved model for symbol ' + self.symbol + ' is not found')
-
-        return loaded_model
 
     def __predict(self, model, data):
         prediction = data
