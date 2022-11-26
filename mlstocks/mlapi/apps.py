@@ -12,4 +12,4 @@ class MlapiConfig(AppConfig):
     lstm_1mo_model = tf.keras.models.load_model('mlapi/blobStorage/lstm_1month_model')
     rf_1d_model = pickle.load(open('mlapi/blobStorage/randomforest_1day_model.sav', 'rb'))
     rf_5d_model = pickle.load(open('mlapi/blobStorage/randomforest_5day_model.sav', 'rb'))
-    rf_1mo_model = pickle.load(open('mlapi/blobStorage/randomforest_5day_model.sav', 'rb'))
+    rf_1mo_model = pickle.load(open('mlapi/blobStorage/randomforest_1month_model.sav', 'rb'))
