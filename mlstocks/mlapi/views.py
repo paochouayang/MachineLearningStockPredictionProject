@@ -8,32 +8,38 @@ from .apps import MlapiConfig
 
 class StockPredictions(APIView):
     def get(self, request):
-        usage = request.GET.get('usage')
-        model = None
-        algorithm = request.GET.get('algorithm')
         ticker = request.GET.get('ticker')
         forecast = request.GET.get('forecast')
+        mse_vals = {}
+        bestAlgorithm = ''
+        model = None
+        lstm_model = None
+        rf_model = None
 
-        if algorithm == 'lstm' and forecast == '1d':
-            model = MlapiConfig.lstm_1d_model
-        if algorithm == 'lstm' and forecast == '5d':
-            model = MlapiConfig.lstm_5d_model
-        if algorithm == 'lstm' and forecast == '1mo':
-            model = MlapiConfig.lstm_1mo_model
-        if algorithm == 'randomforest' and forecast == '1d':
-            model = MlapiConfig.rf_1d_model
-        if algorithm == 'randomforest' and forecast == '5d':
-            model = MlapiConfig.rf_5d_model
-        if algorithm == 'randomforest' and forecast == '1mo':
-            model = MlapiConfig.rf_1mo_model
+        if forecast == '1d':
+            lstm_model = MlapiConfig.lstm_1d_model
+            rf_model = MlapiConfig.rf_1d_model
+        if forecast == '5d':
+            lstm_model = MlapiConfig.lstm_5d_model
+            rf_model = MlapiConfig.rf_5d_model
+        if forecast == '1mo':
+            lstm_model = MlapiConfig.lstm_1mo_model
+            rf_model = MlapiConfig.rf_1mo_model
 
-        stock_obj = Stocks(ticker, algorithm=algorithm, forecast_time_span=forecast, model=model)
+        stock_obj = Stocks(ticker, forecast_time_span=forecast)
+        mse_vals['lstm'] = stock_obj.get_mse(lstm_model, 'lstm')
+        mse_vals['randomforest'] = stock_obj.get_mse(rf_model, 'randomforest')
+        mse_min = min(mse_vals.values())
+        best_alg = [key for key in mse_vals if mse_vals[key] == mse_min]
 
-        if usage == 'forecast':
-            stock_obj.forecast()
-        if usage == 'test':
-            stock_obj.forecast_test()
+        if best_alg[0] == 'lstm':
+            stock_obj.forecast(lstm_model, 'lstm')
+            bestAlgorithm = 'LSTM'
+        if best_alg[0] == 'randomforest':
+            stock_obj.forecast(rf_model, 'randomforest')
+            bestAlgorithm = 'Random Forest'
 
         graphic = stock_obj.plot
-        mlResponse = {"Prediction" : graphic}
+        mlResponse = {"Prediction" : graphic,
+                      'bestAlgorithm': bestAlgorithm}
         return Response(mlResponse, status=status.HTTP_200_OK)

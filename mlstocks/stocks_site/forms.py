@@ -122,22 +122,14 @@ class UserRegistrationForm(ModelForm):
 
 class StocksForm(Form):
     ticker = forms.CharField()
-    ALGO = (
-        ('lstm', 'LSTM'),
-        ('randomforest', 'Random Forest')
-    )
+
     INTERVAL = (
         ('1d', '1 day'),
         ('5d', '5 days'),
         ('1mo', '1 month')
     )
-    USAGE = (
-        ('forecast', 'Forecast'),
-        ('test', 'Test Algorithm')
-    )
-    algorithm = forms.ChoiceField(choices=ALGO)
+
     forecast = forms.ChoiceField(choices=INTERVAL)
-    usage = forms.ChoiceField(choices=USAGE)
 
 class AccountManagementForm(ModelForm):    
 

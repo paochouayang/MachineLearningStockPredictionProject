@@ -10,32 +10,27 @@ from io import BytesIO
 import base64
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
 
 
 class Stocks:
-    def __init__(self, symbol, algorithm, forecast_time_span, model):
+    def __init__(self, symbol, forecast_time_span, algorithm=None, model=None):
         self.symbol = symbol
         self.algorithm = algorithm
         self.data_points = 1000
         self.forecast_time_span = forecast_time_span
         self.delta_days = 720
         self.model = model
-        self.training_segment = None
         self.start = None
         self.end = None
         self.steps = None
         self.data = None
-        self.x_train = None
-        self.y_train = None
-        self.x_test = None
-        self.y_test = None
+        self.lstm_x_test = None
+        self.lstm_y_test = None
+        self.rf_x_test = None
+        self.rf_y_test = None
         self.steps = None
         self.plot = None
-
-        if algorithm in ['randomforest', 'lstm']:
-            self.algorithm = algorithm
-        else:
-            raise ValueError(f'Machine learning algorithm: {algorithm} is not available.')
 
         if forecast_time_span in ['1d', '5d', '1mo']:
             self.forecast_time_span = forecast_time_span
@@ -49,35 +44,38 @@ class Stocks:
             # About 7 hours in a trading day
             self.steps = 7
             self.granularity = '1h'
-            if self.algorithm == 'randomforest':
-                self.seg_ratio = 3
-            if self.algorithm == 'lstm':
-                self.seg_ratio = 4
+            self.rf_seg_ratio = 3
+            self.lstm_seg_ratio = 4
         if forecast_time_span == '5d':
             # About 35 hours in a 5-day trading period
             self.steps = 35
             self.granularity = '1h'
-            if self.algorithm == 'randomforest':
-                self.seg_ratio = 2
-            if self.algorithm == 'lstm':
-                self.seg_ratio = 4
+            self.rf_seg_ratio = 2
+            self.lstm_seg_ratio = 4
         if forecast_time_span == '1mo':
             # 21 trading days in a month
             self.steps = 21
             self.granularity = '1d'
-            if self.algorithm == 'randomforest':
-                self.seg_ratio = 3
-            if self.algorithm == 'lstm':
-                self.seg_ratio = 4
+            self.rf_seg_ratio = 3
+            self.lstm_seg_ratio = 4
 
-        self.training_segment = self.seg_ratio * self.steps
+        self.rf_training_segment = self.rf_seg_ratio * self.steps
+        self.lstm_training_segment = self.lstm_seg_ratio * self.steps
 
-    def forecast(self):
-        plt.cla()
         self.__create_data()
-        model = self.model
+
+    def forecast(self, model, algorithm):
+        if algorithm in ['randomforest', 'lstm']:
+            self.algorithm = algorithm
+            if algorithm == 'lstm':
+                training_segment = self.lstm_training_segment
+            if algorithm == 'randomforest':
+                training_segment = self.rf_training_segment
+        else:
+            raise ValueError(f'Machine learning algorithm: {algorithm} is not available.')
+        plt.cla()
         price_data = self.data.iloc[:]['Open'].values
-        x_predict = np.array(price_data[-self.training_segment:]).reshape(1, -1)
+        x_predict = np.array(price_data[-training_segment:]).reshape(1, -1)
         prediction = self.__predict(model, x_predict)
 
         # Generate future dates to plot against prediction
@@ -101,7 +99,10 @@ class Stocks:
             return future_points_lst
 
         plt.plot(extend_x_axis(), prediction, label='Prediction', color='red')
-        self.data['Open'][-(self.training_segment + self.steps):].plot(label='Historical Data', color='blue')
+        self.data['Open'][-(training_segment + self.steps):].plot(label='Historical Data', color='blue')
+        plt.xlabel("Date")
+        plt.ylabel("Price USD")
+        plt.grid()
         plt.legend(loc='lower left')
 
         buffer = BytesIO()
@@ -115,9 +116,9 @@ class Stocks:
         self.plot = graphic
         return prediction
 
+    """
     def forecast_test(self):
         plt.cla()
-        self.__create_data()
         model = self.model
         prediction = self.__predict(model, self.x_test)
         self.data['Open'][-(self.training_segment + self.steps):-self.steps].plot(label='Training data')
@@ -135,21 +136,36 @@ class Stocks:
         graphic = graphic.decode('utf-8')
         self.plot = graphic
         return prediction
+    """
+
+    def get_mse(self, model, algorithm):
+        if algorithm in ['randomforest', 'lstm']:
+            self.algorithm = algorithm
+        else:
+            raise ValueError(f'Machine learning algorithm: {algorithm} is not available.')
+        if algorithm == 'lstm':
+            prediction = self.__predict(model, self.lstm_x_test)
+            mse = mean_squared_error(self.lstm_y_test, prediction)
+            return mse
+        if algorithm == 'randomforest':
+            prediction = self.__predict(model, self.rf_x_test)
+            mse = mean_squared_error(self.rf_y_test, prediction)
+            return mse
 
     def __create_data(self):
-        if self.algorithm == 'randomforest':
-            self.__create_lstm_data()
-        if self.algorithm == 'lstm':
-            self.__create_random_forest_data()
+        self.__download_data()
+        self.__create_lstm_data()
+        self.__create_random_forest_data()
 
-    def __create_random_forest_data(self):
+    def __download_data(self):
         delta = datetime.timedelta(days=self.delta_days)
         start_date = date.today() - delta
         end_date = date.today()
         data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
                            interval=self.granularity)
-
         self.data = data
+
+    def __create_random_forest_data(self):
         price_data = self.data.iloc[:]['Open'].values
 
         # Limit amount of data points. Too much data causes increased training time.
@@ -169,25 +185,18 @@ class Stocks:
         def create_dataset(dataframe):
             x = []
             y = []
-            for i in range(self.training_segment, len(dataframe)):
-                x.append(dataframe[i - self.training_segment:i])
+            for i in range(self.rf_training_segment, len(dataframe)):
+                x.append(dataframe[i - self.rf_training_segment:i])
                 y.append(dataframe[i])
             x = np.array(x)
             y = np.array(y)
             return x, y
 
-        self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
-        self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
-        self.y_test = np.array(price_data[-self.steps:])
+        #self.rf_x_train, self.rf_y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
+        self.rf_x_test = np.array(price_data[-(self.rf_training_segment + self.steps): -self.steps]).reshape(1, -1)
+        self.rf_y_test = np.array(price_data[-self.steps:])
 
     def __create_lstm_data(self):
-        delta = datetime.timedelta(days=self.delta_days)
-        start_date = date.today() - delta
-        end_date = date.today()
-        data = yf.download(self.symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'),
-                           interval=self.granularity)
-
-        self.data = data
         price_data = self.data.iloc[:]['Open'].values
 
         # Limit amount of data points. Too much data causes increased training time.
@@ -208,16 +217,16 @@ class Stocks:
             dataframe = MinMaxScaler(feature_range=(0, 1)).fit_transform(dataframe.reshape(-1, 1))
             x = []
             y = []
-            for i in range(self.training_segment, len(dataframe)):
-                x.append(dataframe[i - self.training_segment:i])
+            for i in range(self.lstm_training_segment, len(dataframe)):
+                x.append(dataframe[i - self.lstm_training_segment:i])
                 y.append(dataframe[i])
             x = np.array(x)
             y = np.array(y)
             return x, y
 
-        self.x_train, self.y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
-        self.x_test = np.array(price_data[-(self.training_segment + self.steps): -self.steps]).reshape(1, -1)
-        self.y_test = np.array(price_data[-self.steps:])
+        #self.lstm_x_train, self.lstm_y_train = create_dataset(price_data[0:-(self.training_segment + self.steps)])
+        self.lstm_x_test = np.array(price_data[-(self.lstm_training_segment + self.steps): -self.steps]).reshape(1, -1)
+        self.lstm_y_test = np.array(price_data[-self.steps:])
 
     def __predict(self, model, data):
         prediction = data
@@ -231,10 +240,10 @@ class Stocks:
                 next_predict = model.predict(x_predict)
                 next_predict = scaler.inverse_transform(next_predict.reshape(-1, 1))
                 prediction = np.append(prediction, next_predict)
-                x_predict = prediction[-self.training_segment:].reshape(1, -1)
-            else:
+                x_predict = prediction[-self.lstm_training_segment:].reshape(1, -1)
+            if self.algorithm == 'randomforest':
                 next_predict = model.predict(x_predict)
                 prediction = np.append(prediction, next_predict)
-                x_predict = prediction[-self.training_segment:].reshape(1, -1)
+                x_predict = prediction[-self.rf_training_segment:].reshape(1, -1)
 
         return prediction[-self.steps:]

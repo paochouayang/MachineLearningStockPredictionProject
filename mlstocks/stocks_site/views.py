@@ -160,15 +160,16 @@ async def stockPredict(request):
         stockForm = forms.StocksForm(request.POST)
         if stockForm.is_valid():
             input = stockForm.cleaned_data
-            doesExist = await ticker_exists(input['ticker'])
+            ticker = input['ticker']
+            forecast = input['forecast']
+            doesExist = await ticker_exists(ticker)
+
             if not doesExist:
                 message = 'Ticker not available'
                 return render(request, 'stocks_site/main.html', {'stockForm': stockForm, 'message': message})
             param = {
-                'ticker': input['ticker'],
-                'algorithm': input['algorithm'],
-                'forecast': input['forecast'],
-                'usage': input['usage']
+                'ticker': ticker,
+                'forecast': forecast
             }
 
             try:
@@ -180,8 +181,19 @@ async def stockPredict(request):
             response_dict = json.loads(response.text)
 
             graphic = response_dict['Prediction']
+            description = await get_ticker_description(ticker)
+            if forecast == '1d':
+                timespan = '1 Day'
+            if forecast == '5d':
+                timespan = '5 Day'
+            if forecast == '1mo':
+                timespan = '1 Month'
+            title = description + ' (' + ticker.upper() + ') - ' + timespan + ' Forecast'
+            model_message = 'The ' + response_dict['bestAlgorithm'] + ' algorithm was chosen for this prediction based ' \
+                                                                      'on best accuracy from past performance.'
             
-            return render(request, 'stocks_site/main.html', {'graphic':graphic, 'stockForm': stockForm})
+            return render(request, 'stocks_site/main.html', {'graphic': graphic, 'stockForm': stockForm,
+                                                             'model_message': model_message, 'title': title})
     else:
         stockForm = forms.StocksForm()
     return render(request, 'stocks_site/main.html', {'stockForm': stockForm})
@@ -189,6 +201,11 @@ async def stockPredict(request):
 @sync_to_async
 def ticker_exists(inputTicker):
     return Tickers.objects.filter(ticker=inputTicker).exists()
+
+@sync_to_async
+def get_ticker_description(inputTicker):
+    ticker = Tickers.objects.get(ticker=inputTicker)
+    return ticker.description
     
 def user_login(request):
     message = ""
