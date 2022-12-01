@@ -178,22 +178,28 @@ async def stockPredict(request):
             except httpx.ReadTimeout:
                 pass
             # response = requests.get(f'http://127.0.0.1:8000/api/', params=symbol)
-            response_dict = json.loads(response.text)
-
-            graphic = response_dict['Prediction']
-            description = await get_ticker_description(ticker)
+            timespan = None
             if forecast == '1d':
                 timespan = '1 Day'
             if forecast == '5d':
                 timespan = '5 Day'
             if forecast == '1mo':
                 timespan = '1 Month'
-            title = description + ' (' + ticker.upper() + ') - ' + timespan + ' Forecast'
-            model_message = 'The ' + response_dict['bestAlgorithm'] + ' algorithm was chosen for this prediction based ' \
-                                                                      'on best accuracy from past performance.'
-            
-            return render(request, 'stocks_site/main.html', {'graphic': graphic, 'stockForm': stockForm,
-                                                             'model_message': model_message, 'title': title})
+            try:
+                response_dict = json.loads(response.text)
+
+                graphic = response_dict['Prediction']
+                description = await get_ticker_description(ticker)
+
+                title = description + ' (' + ticker.upper() + ') - ' + timespan + ' Forecast'
+                model_message = 'The ' + response_dict['bestAlgorithm'] + ' algorithm was chosen for this prediction based ' \
+                                                                          'on best accuracy from past performance.'
+
+                return render(request, 'stocks_site/main.html', {'graphic': graphic, 'stockForm': stockForm,
+                                                                 'model_message': model_message, 'title': title})
+            except json.decoder.JSONDecodeError:
+                message = "There is not enough historical data for this stock to make a " + timespan + ' forecast.'
+                return render(request, 'stocks_site/main.html', {'stockForm': stockForm, 'message': message})
     else:
         stockForm = forms.StocksForm()
     return render(request, 'stocks_site/main.html', {'stockForm': stockForm})
