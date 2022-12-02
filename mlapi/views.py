@@ -18,17 +18,17 @@ class StockPredictions(APIView):
 
         if forecast == '1d':
             lstm_model = MlapiConfig.lstm_1d_model
-            rf_model = MlapiConfig.rf_1d_model
+            #rf_model = MlapiConfig.rf_1d_model
         if forecast == '5d':
             lstm_model = MlapiConfig.lstm_5d_model
-            rf_model = MlapiConfig.rf_5d_model
+            #rf_model = MlapiConfig.rf_5d_model
         if forecast == '1mo':
             lstm_model = MlapiConfig.lstm_1mo_model
-            rf_model = MlapiConfig.rf_1mo_model
+            #rf_model = MlapiConfig.rf_1mo_model
 
         stock_obj = Stocks(ticker, forecast_time_span=forecast)
         mse_vals['lstm'] = stock_obj.get_mse(lstm_model, 'lstm')
-        mse_vals['randomforest'] = stock_obj.get_mse(rf_model, 'randomforest')
+        #mse_vals['randomforest'] = stock_obj.get_mse(rf_model, 'randomforest')
         mse_min = min(mse_vals.values())
         best_alg = [key for key in mse_vals if mse_vals[key] == mse_min]
 

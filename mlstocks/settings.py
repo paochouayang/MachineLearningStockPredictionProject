@@ -12,10 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import environ
 
-env = environ.Env()
-environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,13 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1go=z_bt!ww2pcaj8)&fkohe@z57z!eik)37((_mo%2!76rt=p'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mlstocks-production.up.railway.app', '0.0.0.0']
 
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+
+CSRF_TRUSTED_ORIGINS = ['https://mlstocks-production.up.railway.app']
 
 # Application definition
 
@@ -48,7 +49,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware',    
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mlstocksdb_staywinmay',
         'USER': 'mlstocksdb_staywinmay',
-        'PASSWORD': env('DATABASE_PASSWORD'),
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
         'HOST': 'h1.host.filess.io',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {
@@ -137,6 +139,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Simplified static file serving.
+# https://pypi.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -154,9 +161,9 @@ REST_FRAMEWORK = {
 }
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST=env('EMAIL_HOST')
+EMAIL_HOST=os.environ['EMAIL_HOST']
 EMAIL_PORT='587'
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
-RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
+EMAIL_HOST_USER=os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD=os.environ['EMAIL_HOST_PASSWORD']
+RECIPIENT_ADDRESS = os.environ['RECIPIENT_ADDRESS']
