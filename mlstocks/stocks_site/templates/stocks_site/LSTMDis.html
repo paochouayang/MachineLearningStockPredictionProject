@@ -2,7 +2,7 @@
 {% block title %}LSTM Discription{% endblock %}
 {% block content %}
 <div class="spacer"></div>
-    <main class="m-auto login-main">
+    <main class="m-auto home-main">
         <h1>How LSTM ML Works</h1>
         <p>LSTM or Long Short Term Memory is composed of a cell, an Input Gate, an Output Gate, and a Forget Gate. The forgot layer is  implemented using a sigmoid function that evaluates the hidden state and the current input in order to decide whether we keep the information or get rid of it.</p>
         <p>The second step would be to decide what information the cell should store. This is done in two parts; the first part is composed of a sigmoid that decides which value we should update. Then, another layer, which uses tanh, is used to create a vector of candidates. At the end of the notation, the cell decides what to output. The first part is to decide what part of the cell we are going to output. This is determined by a sigmoid. The second part is to squash the values between -1 and 1, and then multiply it by the sigmoid gate.</p>
